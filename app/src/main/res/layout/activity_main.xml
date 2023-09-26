@@ -13,6 +13,7 @@
         android:layout_height="@dimen/avatar_size"
         android:layout_marginBottom="@dimen/padding_common"
         android:contentDescription="@string/description_post_avatar_author"
+        android:src="@drawable/ic_netology_48dp"
         app:layout_constraintBottom_toBottomOf="@id/barrierBottom"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,22 +26,22 @@
         android:layout_marginHorizontal="@dimen/padding_common"
         android:ellipsize="end"
         android:singleLine="true"
+        android:text="@sample/posts.json/data/author"
         app:layout_constraintBottom_toTopOf="@id/published"
         app:layout_constraintEnd_toStartOf="@id/menu"
         app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintTop_toTopOf="@id/avatar"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="@sample/posts.json/data/author" />
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/published"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_common"
+        android:text="@sample/posts.json/data/published"
         app:layout_constraintBottom_toBottomOf="@id/avatar"
         app:layout_constraintStart_toEndOf="@id/avatar"
-        app:layout_constraintTop_toBottomOf="@id/author"
-        tools:text="@sample/posts.json/data/published" />
+        app:layout_constraintTop_toBottomOf="@id/author" />
 
     <ImageButton
         android:id="@+id/menu"
@@ -50,7 +51,7 @@
         android:contentDescription="@string/description_post_menu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/ic_baseline_more_vert_24" />
+        app:srcCompat="@drawable/ic_more_vert_24" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierBottom"
@@ -65,9 +66,9 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/padding_common"
         android:autoLink="web"
+        android:text="@sample/posts.json/data/content"
         app:layout_constraintBottom_toTopOf="@id/barrierTop"
-        app:layout_constraintTop_toBottomOf="@id/barrierBottom"
-        tools:text="@sample/posts.json/data/content" />
+        app:layout_constraintTop_toBottomOf="@id/barrierBottom" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierTop"
@@ -85,59 +86,59 @@
         android:contentDescription="@string/description_like"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/barrierTop"
-        tools:srcCompat="@drawable/ic_baseline_favorite_border_24" />
+        app:srcCompat="@drawable/ic_like_24" />
 
     <TextView
-        android:id="@+id/likesText"
-        android:layout_width="0dp"
+        android:id="@+id/likeCount"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_small"
+        android:text="@sample/posts.json/data/likeCount"
         app:layout_constraintBottom_toBottomOf="@id/like"
         app:layout_constraintStart_toEndOf="@id/like"
-        app:layout_constraintTop_toTopOf="@id/like"
-        tools:text="@sample/posts.json/data/likesText" />
+        app:layout_constraintTop_toTopOf="@id/like" />
 
     <ImageButton
-        android:id="@+id/repost"
+        android:id="@+id/share"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_common"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_repost"
         app:layout_constraintBottom_toBottomOf="@id/like"
-        app:layout_constraintStart_toEndOf="@id/likesText"
+        app:layout_constraintStart_toEndOf="@id/likeCount"
         app:layout_constraintTop_toTopOf="@id/like"
-        tools:srcCompat="@drawable/ic_baseline_share_24" />
+        app:srcCompat="@drawable/ic_share_24" />
 
     <TextView
-        android:id="@+id/repostsText"
-        android:layout_width="0dp"
+        android:id="@+id/shareCount"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_small"
+        android:text="@sample/posts.json/data/shareCount"
         app:layout_constraintBottom_toBottomOf="@id/like"
-        app:layout_constraintStart_toEndOf="@id/repost"
-        app:layout_constraintTop_toTopOf="@id/like"
-        tools:text="@sample/posts.json/data/repostsText" />
+        app:layout_constraintStart_toEndOf="@id/share"
+        app:layout_constraintTop_toTopOf="@id/like" />
 
     <ImageButton
-        android:id="@+id/views"
+        android:id="@+id/view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/padding_small"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_views"
         app:layout_constraintBottom_toBottomOf="@id/like"
-        app:layout_constraintEnd_toStartOf="@id/viewsText"
+        app:layout_constraintEnd_toStartOf="@id/viewCount"
         app:layout_constraintTop_toTopOf="@id/like"
-        tools:srcCompat="@drawable/ic_baseline_visibility_24" />
+        app:srcCompat="@drawable/ic_view_24" />
 
     <TextView
-        android:id="@+id/viewsText"
+        android:id="@+id/viewCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@sample/posts.json/data/viewCount"
         app:layout_constraintBottom_toBottomOf="@id/like"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/like"
-        tools:text="@sample/posts.json/data/viewsText" />
+        app:layout_constraintTop_toTopOf="@id/like" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
