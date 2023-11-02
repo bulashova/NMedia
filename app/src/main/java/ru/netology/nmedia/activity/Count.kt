@@ -1,4 +1,4 @@
-package ru.netology.nmedia.dto
+package ru.netology.nmedia.activity
 
 import kotlin.math.truncate
 
