@@ -15,7 +15,9 @@ class PostRepositoryInMemoryImpl : PostRepository {
             likedByMe = false,
             likes = 6_999,
             shares = 95,
-            views = 1_332_999
+            views = 1_332_999,
+            videoURL = "https://www.youtube.com/watch?v=WhWc3b3KhnY",
+            videoTitle = "Spring - Blender Open Movie"
         ),
         Post(
             id = nextId++,

@@ -18,4 +18,15 @@
         <item name="android:textColor">@color/color_control_normal</item>
     </style>
 
+    <style name="Widget.AppTheme.CancelButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">?attr/colorOnPrimary</item>
+        <item name="tint">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.AppTheme.PlayButton" parent="Widget.MaterialComponents.ExtendedFloatingActionButton.Icon">
+        <item name="android:alpha">0.8</item>
+        <item name="iconSize">68dp</item>
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
 </resources>

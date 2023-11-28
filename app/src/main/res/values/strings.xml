@@ -15,4 +15,12 @@
     <string name="description_post_edit">Edit Post</string>
     <string name="description_cancel">Cancel edit</string>
 
+    <string name="no_apps">No apps supporting this format</string>
+    <string name="ok">OK</string>
+    <string name="sharing_title">Share</string>
+    <string name="add_post">Add Post</string>
+    <string name="video">Video</string>
+    <string name="play_video">Play video</string>
+    <string name="new_post">New Post</string>
+
 </resources>

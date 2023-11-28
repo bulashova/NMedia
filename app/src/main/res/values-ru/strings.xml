@@ -15,4 +15,13 @@
     <string name="post_edit">Редактирование Поста</string>
     <string name="description_post_edit">Редактирование Поста</string>
     <string name="description_cancel">Отмена редактирования</string>
+
+    <string name="no_apps">Нет приложений, поддерживающих этот формат</string>
+    <string name="ok">ОК</string>
+    <string name="sharing_title">Поделиться</string>
+    <string name="add_post">Добавить пост</string>
+    <string name="video">Видео</string>
+    <string name="play_video">Воспроизвести видео</string>
+    <string name="new_post">Новый Пост</string>
+
 </resources>

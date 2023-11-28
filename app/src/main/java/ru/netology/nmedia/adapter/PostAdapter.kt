@@ -1,6 +1,7 @@
 package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
@@ -16,7 +17,8 @@ interface OnInteractionListener {
     fun onShare(post: Post)
     fun onEdit(post: Post)
     fun onRemove(post: Post)
-    fun onCancelEdit(post: Post)
+    fun onCancel(post: Post)
+    fun onPlayVideo(post: Post)
 }
 
 class PostAdapter(
@@ -44,6 +46,21 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
+
+            if (post.videoURL.isNotEmpty()) {
+                group.visibility = View.VISIBLE
+                video.setImageResource(R.drawable.ic_youtube)
+                videoTitle.text = post.videoTitle
+                play.setOnClickListener {
+                    onInteractionListener.onPlayVideo(post)
+                }
+                video.setOnClickListener {
+                    onInteractionListener.onPlayVideo(post)
+                }
+                videoTitle.setOnClickListener {
+                    onInteractionListener.onPlayVideo(post)
+                }
+            } else group.visibility = View.GONE
 
             like.isChecked = post.likedByMe
             like.text = Count.formatCount(post.likes)
@@ -89,4 +106,3 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
     override fun areContentsTheSame(oldItem: Post, newItem: Post) = oldItem == newItem
 
 }
-
