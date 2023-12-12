@@ -3,30 +3,32 @@ package ru.netology.nmedia.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewAndEditPostFragment.Companion.textArg
+import ru.netology.nmedia.activity.PreviewPostFragment.Companion.longArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostAdapter
-import ru.netology.nmedia.databinding.ActivityMainBinding
+import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val viewModel: PostViewModel by viewModels()
-
-        val newAndEditPostContract =
-            registerForActivityResult(NewAndEditPostActivityContract()) { result ->
-                result ?: return@registerForActivityResult
-                viewModel.changeContentAndSave(result)
-            }
+class FeedFragment : Fragment() {
+    private val Fragment.packageManager get() = activity?.packageManager
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding = FragmentFeedBinding.inflate(layoutInflater, container, false)
+        val viewModel: PostViewModel by activityViewModels<PostViewModel>()
 
         val adapter = PostAdapter(object : OnInteractionListener {
             override fun onLike(post: Post) {
@@ -42,7 +44,11 @@ class MainActivity : AppCompatActivity() {
                 val chooser =
                     Intent.createChooser(intent, getString(R.string.sharing_title))
 
-                if (chooser.resolveActivity(packageManager) != null) {
+                if (packageManager?.let {
+                        chooser.resolveActivity(
+                            it
+                        )
+                    } != null) {
                     startActivity(chooser)
                     viewModel.shareById(post.id)
                 } else {
@@ -51,13 +57,18 @@ class MainActivity : AppCompatActivity() {
                         BaseTransientBottomBar.LENGTH_INDEFINITE
                     )
                         .setAction(R.string.ok) {
-                            finish()
+                            findNavController().navigateUp()
                         }.show()
                 }
             }
 
             override fun onEdit(post: Post) {
-                newAndEditPostContract.launch(post.content)
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_newAndEditPostFragment,
+                    Bundle().apply {
+                        textArg = post.content
+                        longArg = post.id
+                    })
                 viewModel.edit(post)
             }
 
@@ -72,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             override fun onPlayVideo(post: Post) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoURL))
 
-                if (intent.resolveActivity(packageManager) != null) {
+                if (packageManager?.let { intent.resolveActivity(it) } != null) {
                     startActivity(intent)
                 } else {
                     Snackbar.make(
@@ -80,16 +91,24 @@ class MainActivity : AppCompatActivity() {
                         BaseTransientBottomBar.LENGTH_INDEFINITE
                     )
                         .setAction(R.string.ok) {
-                            finish()
+                            findNavController().navigateUp()
                         }.show()
                 }
+            }
+
+            override fun onPreview(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_previewPostFragment,
+                    Bundle().apply {
+                        longArg = post.id
+                    })
             }
         }
         )
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(this) { posts ->
+        viewModel.data.observe(viewLifecycleOwner) { posts ->
             val newPost = adapter.currentList.size < posts.size
             adapter.submitList(posts) {
                 if (newPost) {
@@ -100,7 +119,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.newPostButton.setOnClickListener {
             viewModel.cancel()
-            newAndEditPostContract.launch("")
+            findNavController().navigate(R.id.action_feedFragment_to_newAndEditPostFragment)
         }
+        return binding.root
     }
 }

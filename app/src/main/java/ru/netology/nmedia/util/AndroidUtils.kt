@@ -25,7 +25,8 @@ object AndroidUtils {
         requestFocus()
         if (hasWindowFocus()) {
             showTheKeyboardNow()
-        } else {
+        }
+        else {
             viewTreeObserver.addOnWindowFocusChangeListener(
                 object : ViewTreeObserver.OnWindowFocusChangeListener {
                     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -35,6 +36,16 @@ object AndroidUtils {
                         }
                     }
                 })
+        }
+    }
+
+    fun View.showTheKeyboardNow() {
+        if (isFocused) {
+            post {
+                val imm =
+                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ interface OnInteractionListener {
     fun onRemove(post: Post)
     fun onCancel(post: Post)
     fun onPlayVideo(post: Post)
+    fun onPreview(post: Post)
 }
 
 class PostAdapter(
@@ -94,6 +95,10 @@ class PostViewHolder(
                         }
                     }
                 }.show()
+            }
+
+            root.setOnClickListener {
+                onInteractionListener.onPreview(post)
             }
         }
     }

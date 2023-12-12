@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.NewAndEditPostActivity">
+    tools:context=".activity.NewAndEditPostFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
@@ -37,6 +37,8 @@
         android:padding="@dimen/padding_common"
         app:layout_anchor="@id/topAppBar"
         app:layout_anchorGravity="bottom"
+        android:layout_marginBottom="@dimen/padding_bottom"
+        android:layout_marginTop="@dimen/padding_bottom"
         tools:text="@sample/posts.json/data/content" />
 
     <com.google.android.material.bottomappbar.BottomAppBar

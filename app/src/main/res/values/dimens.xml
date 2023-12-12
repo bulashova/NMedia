@@ -2,5 +2,6 @@
 <resources>
     <dimen name="padding_common">16dp</dimen>
     <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_bottom">64dp</dimen>
     <dimen name="avatar_size">48dp</dimen>
 </resources>

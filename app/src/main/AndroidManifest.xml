@@ -20,13 +20,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NMedia"
         tools:targetApi="31">
+
         <activity
-            android:name=".activity.NewAndEditPostActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity
-            android:name=".activity.IntentHandlerActivity"
-            android:exported="true">
+            android:name=".activity.AppActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <nav-graph android:value="@navigation/nav_main" />
+
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -34,10 +34,7 @@
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".activity.MainActivity"
-            android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
