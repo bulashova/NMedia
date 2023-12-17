@@ -1,9 +1,12 @@
 package ru.netology.nmedia.activity
 
+import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -29,23 +32,43 @@ class NewAndEditPostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val prefs = context?.getSharedPreferences("saved", MODE_PRIVATE)
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (arguments?.longArg == 0L) {
+                    val text = requireActivity().findViewById<EditText>(R.id.content)
+                    with(prefs?.edit()) {
+                        this?.putString("saved", text.text.toString())
+                        this?.apply()
+                        println("text saved")
+                    }
+                }
+                findNavController().navigateUp()
+            }
+        })
+
         val viewModel by activityViewModels<PostViewModel>()
         val binding = FragmentNewAndEditPostBinding.inflate(layoutInflater, container, false)
 
         binding.content.focusAndShowKeyboard()
-        binding.content.setText(arguments?.textArg.orEmpty())
 
-        binding.topAppBar.setTitle(
-            if (arguments?.textArg.orEmpty()
-                    .isBlank() || arguments?.longArg == 0L
-            ) R.string.new_post
-            else
-                R.string.post_edit
-        )
-
-        if (arguments?.textArg.orEmpty().isBlank()) {
-            binding.content.setHint(R.string.post_text)
-            binding.content.showTheKeyboardNow()
+        if (arguments?.longArg == 0L) {
+            binding.topAppBar.setTitle(R.string.new_post)
+            if (arguments?.textArg.isNullOrBlank()) {
+                if (!prefs?.getString("saved", null).isNullOrBlank()) {
+                    prefs!!.getString("saved", null).let {
+                        binding.content.setText(it)
+                        println("text loaded")
+                    }
+                } else {
+                    binding.content.setHint(R.string.post_text)
+                    binding.content.showTheKeyboardNow()
+                }
+            } else
+                binding.content.setText(arguments?.textArg.orEmpty())
+        } else {
+            binding.topAppBar.setTitle(R.string.post_edit)
+            binding.content.setText(arguments?.textArg.orEmpty())
         }
 
         binding.save.setOnClickListener() {
@@ -62,10 +85,12 @@ class NewAndEditPostFragment : Fragment() {
                         findNavController().navigateUp()
                     }.show()
             }
+            prefs?.edit()?.clear()?.apply()
         }
 
         binding.cancel.setOnClickListener() {
             viewModel.cancel()
+            prefs?.edit()?.clear()?.apply()
             findNavController().navigateUp()
         }
         return binding.root

@@ -119,7 +119,10 @@ class FeedFragment : Fragment() {
 
         binding.newPostButton.setOnClickListener {
             viewModel.cancel()
-            findNavController().navigate(R.id.action_feedFragment_to_newAndEditPostFragment)
+            findNavController().navigate(R.id.action_feedFragment_to_newAndEditPostFragment,
+                Bundle().apply {
+                    longArg = 0L
+                })
         }
         return binding.root
     }

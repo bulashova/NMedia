@@ -21,7 +21,11 @@
         android:id="@+id/newAndEditPostFragment"
         android:name="ru.netology.nmedia.activity.NewAndEditPostFragment"
         android:label="fragment_new_and_edit_post"
-        tools:layout="@layout/fragment_new_and_edit_post" />
+        tools:layout="@layout/fragment_new_and_edit_post">
+        <action
+            android:id="@+id/action_newAndEditPostFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+    </fragment>
     <fragment
         android:id="@+id/previewPostFragment"
         android:name="ru.netology.nmedia.activity.PreviewPostFragment"
@@ -29,5 +33,8 @@
         <action
             android:id="@+id/action_previewPostFragment_to_newAndEditPostFragment"
             app:destination="@id/newAndEditPostFragment" />
+        <action
+            android:id="@+id/action_previewPostFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
     </fragment>
 </navigation>
