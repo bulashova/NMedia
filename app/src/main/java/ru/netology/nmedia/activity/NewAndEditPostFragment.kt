@@ -58,6 +58,7 @@ class NewAndEditPostFragment : Fragment() {
                 if (!prefs?.getString("saved", null).isNullOrBlank()) {
                     prefs!!.getString("saved", null).let {
                         binding.content.setText(it)
+                        binding.content.showTheKeyboardNow()
                         println("text loaded")
                     }
                 } else {

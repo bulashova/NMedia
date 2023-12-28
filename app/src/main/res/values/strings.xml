@@ -14,7 +14,6 @@
     <string name="post_edit">Edit Post</string>
     <string name="description_post_edit">Edit Post</string>
     <string name="description_cancel">Cancel edit</string>
-
     <string name="no_apps">No apps supporting this format</string>
     <string name="ok">OK</string>
     <string name="sharing_title">Share</string>
@@ -23,4 +22,11 @@
     <string name="play_video">Play video</string>
     <string name="new_post">New Post</string>
 
+    <string name="google_play_unavailable">Google Api Unavailable</string>
+    <string name="notification_user_liked">User %1$s liked %2$s\'s post</string>
+    <string name="channel_remote_name">Server notifications</string>
+    <string name="channel_remote_description">Notifications from remote server</string>
+    <string name="notification_new_post">%1$s posted a new post:</string>
+    <string name="unknown_notification_type">Unknown notification type</string>
+    <string name="try_updating">Try updating the app</string>
 </resources>

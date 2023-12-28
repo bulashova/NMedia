@@ -15,7 +15,6 @@
     <string name="post_edit">Редактирование Поста</string>
     <string name="description_post_edit">Редактирование Поста</string>
     <string name="description_cancel">Отмена редактирования</string>
-
     <string name="no_apps">Нет приложений, поддерживающих этот формат</string>
     <string name="ok">ОК</string>
     <string name="sharing_title">Поделиться</string>
@@ -24,4 +23,11 @@
     <string name="play_video">Воспроизвести видео</string>
     <string name="new_post">Новый Пост</string>
 
+    <string name="google_play_unavailable">Google Api Недоступно</string>
+    <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
+    <string name="channel_remote_name">Уведомления с сервера</string>
+    <string name="channel_remote_description">Уведомления с удалённого сервера</string>
+    <string name="notification_new_post">%1$s опубликовал(а) новый пост:</string>
+    <string name="unknown_notification_type">Неизвеcтный тип уведомления</string>
+    <string name="try_updating">Попробуйте обновить приложение</string>
 </resources>
