@@ -76,6 +76,7 @@ class NewAndEditPostFragment : Fragment() {
             val text = binding.content.text?.toString()
             if (!text.isNullOrBlank()) {
                 viewModel.changeContentAndSave(text)
+                viewModel.loadPosts()
                 findNavController().navigateUp()
             } else {
                 Snackbar.make(
@@ -88,10 +89,14 @@ class NewAndEditPostFragment : Fragment() {
             }
             prefs?.edit()?.clear()?.apply()
         }
-
         binding.cancel.setOnClickListener() {
             viewModel.cancel()
             prefs?.edit()?.clear()?.apply()
+            findNavController().navigateUp()
+        }
+
+        viewModel.postCreated.observe(viewLifecycleOwner) {
+            viewModel.loadPosts()
             findNavController().navigateUp()
         }
         return binding.root

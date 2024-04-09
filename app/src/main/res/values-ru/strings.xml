@@ -30,4 +30,9 @@
     <string name="notification_new_post">%1$s опубликовал(а) новый пост:</string>
     <string name="unknown_notification_type">Неизвеcтный тип уведомления</string>
     <string name="try_updating">Попробуйте обновить приложение</string>
+
+    <string name="no_posts">Постов пока нет</string>
+    <string name="something_went_wrong">Что-то пошло не так</string>
+    <string name="retry">Повторить</string>
+
 </resources>

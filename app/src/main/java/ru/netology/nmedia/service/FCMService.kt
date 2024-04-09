@@ -35,10 +35,11 @@ class FCMService : FirebaseMessagingService() {
         }
     }
 
-    override fun onMessageReceived(message: RemoteMessage) {
-        try {
-            message.data["action"]?.let {
-                when (Actions.valueOf(it)) {
+    override fun onMessageReceived(message: RemoteMessage) =
+        Actions.values().also { println(Gson().toJson(message)) }
+            .firstOrNull { it.name == message.data["action"] }
+            ?.let { action ->
+                when (action) {
                     Actions.LIKE -> handleLike(
                         Gson().fromJson(
                             message.data["content"],
@@ -53,14 +54,7 @@ class FCMService : FirebaseMessagingService() {
                         )
                     )
                 }
-            }
-
-        } catch (e: IllegalArgumentException) {
-            handleUnknownNotificationType()
-        }
-        println(Gson().toJson(message))
-    }
-
+            } ?: handleUnknownNotificationType()
 
     private fun handleLike(like: Like) {
         val intent = Intent(this, AppActivity::class.java)

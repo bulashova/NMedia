@@ -29,4 +29,9 @@
     <string name="notification_new_post">%1$s posted a new post:</string>
     <string name="unknown_notification_type">Unknown notification type</string>
     <string name="try_updating">Try updating the app</string>
+
+    <string name="no_posts">No posts</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="retry">Retry</string>
+
 </resources>
