@@ -50,15 +50,22 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         post?.let {
             thread {
                 try {
-                    if (!post.likedByMe) {
+                    val postServer = if (!post.likedByMe) {
                         repository.likeById(id)
                     } else {
                         repository.removeLikeById(id)
                     }
+                    _data.postValue(
+                        _data.value?.copy(posts = _data.value?.posts.orEmpty()
+                            .map {
+                                if (it.id == id) {
+                                    postServer
+                                } else it
+                            }
+                        ))
                 } catch (e: IOException) {
                     FeedModel(error = true)
                 }
-                loadPosts()
             }
         }
     }
