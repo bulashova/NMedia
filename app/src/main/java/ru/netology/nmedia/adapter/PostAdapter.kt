@@ -48,7 +48,7 @@ class PostViewHolder(
             published.text = post.published
             content.text = post.content
 
-            if (post.videoURL.isNotEmpty()) {
+            if (!post.videoURL.isNullOrBlank()) {
                 group.visibility = View.VISIBLE
                 video.setImageResource(R.drawable.ic_youtube)
                 videoTitle.text = post.videoTitle
@@ -65,8 +65,8 @@ class PostViewHolder(
 
             like.isChecked = post.likedByMe
             like.text = Count.formatCount(post.likes)
-            share.text = Count.formatCount(post.shares)
-            view.text = Count.formatCount(post.views)
+            share.text = post.shares?.let { Count.formatCount(it) }
+            view.text = post.views?.let { Count.formatCount(it) }
 
             like.setOnClickListener {
                 onInteractionListener.onLike(post)

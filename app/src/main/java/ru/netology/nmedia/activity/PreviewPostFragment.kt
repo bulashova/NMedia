@@ -60,95 +60,94 @@ class PreviewPostFragment : Fragment() {
         }
 
         val id = requireArguments().longArg
-        viewModel.data.observe(viewLifecycleOwner) {
-            val post = it.find { it.id == id }
-            if (post == null) {
-                findNavController().navigateUp()
-                return@observe
-            } else {
-                with(binding) {
-                    author.text = post.author
-                    published.text = post.published
-                    content.text = post.content
+        val post = viewModel.data.value?.posts?.find { it.id == id }
 
-                    if (post.videoURL.isNotEmpty()) {
-                        group.visibility = View.VISIBLE
-                        video.setImageResource(R.drawable.ic_youtube)
-                        videoTitle.text = post.videoTitle
-                        play.setOnClickListener {
-                            onPlayVideo(post)
-                        }
-                        video.setOnClickListener {
-                            onPlayVideo(post)
-                        }
-                        videoTitle.setOnClickListener {
-                            onPlayVideo(post)
-                        }
-                    } else group.visibility = View.GONE
+        if (post == null) {
+            findNavController().navigateUp()
+        } else {
+            with(binding) {
+                author.text = post.author
+                published.text = post.published
+                content.text = post.content
 
-                    like.isChecked = post.likedByMe
-                    like.text = Count.formatCount(post.likes)
-                    share.text = Count.formatCount(post.shares)
-                    view.text = Count.formatCount(post.views)
-
-                    like.setOnClickListener {
-                        viewModel.likeById(post.id)
+                if (!post.videoURL.isNullOrBlank()) {
+                    group.visibility = View.VISIBLE
+                    video.setImageResource(R.drawable.ic_youtube)
+                    videoTitle.text = post.videoTitle
+                    play.setOnClickListener {
+                        onPlayVideo(post)
                     }
+                    video.setOnClickListener {
+                        onPlayVideo(post)
+                    }
+                    videoTitle.setOnClickListener {
+                        onPlayVideo(post)
+                    }
+                } else group.visibility = View.GONE
 
-                    share.setOnClickListener {
-                        val intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, post.content)
-                            type = "text/plain"
-                        }
-                        val chooser =
-                            Intent.createChooser(intent, getString(R.string.sharing_title))
+                like.isChecked = post.likedByMe
+                like.text = Count.formatCount(post.likes)
+                share.text = post.shares?.let { Count.formatCount(it) }
+                view.text = post.views?.let { Count.formatCount(it) }
 
-                        if (packageManager?.let {
-                                chooser.resolveActivity(
-                                    it
-                                )
-                            } != null) {
-                            startActivity(chooser)
-                            viewModel.shareById(post.id)
-                        } else {
-                            Snackbar.make(
-                                binding.root, R.string.no_apps,
-                                BaseTransientBottomBar.LENGTH_INDEFINITE
+                like.setOnClickListener {
+                    viewModel.likeById(post.id)
+                    findNavController().navigateUp()
+                }
+
+                share.setOnClickListener {
+                    val intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, post.content)
+                        type = "text/plain"
+                    }
+                    val chooser =
+                        Intent.createChooser(intent, getString(R.string.sharing_title))
+
+                    if (packageManager?.let {
+                            chooser.resolveActivity(
+                                it
                             )
-                                .setAction(R.string.ok) {
-                                    findNavController().navigateUp()
-                                }.show()
-                        }
+                        } != null) {
+                        startActivity(chooser)
+                        viewModel.shareById(post.id)
+                    } else {
+                        Snackbar.make(
+                            binding.root, R.string.no_apps,
+                            BaseTransientBottomBar.LENGTH_INDEFINITE
+                        )
+                            .setAction(R.string.ok) {
+                                findNavController().navigateUp()
+                            }.show()
                     }
+                }
 
-                    menu.setOnClickListener {
-                        PopupMenu(it.context, it).apply {
-                            inflate(R.menu.options_post)
-                            setOnMenuItemClickListener { menuItem ->
-                                when (menuItem.itemId) {
-                                    R.id.edit -> {
-                                        findNavController().navigate(
-                                            R.id.action_previewPostFragment_to_newAndEditPostFragment,
-                                            Bundle().apply {
-                                                textArg = post.content
-                                                longArg = post.id
-                                            })
-                                        viewModel.edit(post)
-                                        true
-                                    }
-
-                                    R.id.remove -> {
-                                        findNavController().navigateUp()
-                                        viewModel.removeById(post.id)
-                                        true
-                                    }
-
-                                    else -> false
+                menu.setOnClickListener {
+                    PopupMenu(it.context, it).apply {
+                        inflate(R.menu.options_post)
+                        setOnMenuItemClickListener { menuItem ->
+                            when (menuItem.itemId) {
+                                R.id.edit -> {
+                                    findNavController().navigate(
+                                        R.id.action_previewPostFragment_to_newAndEditPostFragment,
+                                        Bundle().apply {
+                                            textArg = post.content
+                                            longArg = post.id
+                                        })
+                                    viewModel.edit(post)
+                                    true
                                 }
+
+                                R.id.remove -> {
+                                    viewModel.removeById(post.id)
+                                    findNavController().navigateUp()
+                                    true
+                                }
+
+                                else -> false
                             }
-                        }.show()
-                    }
+                        }
+                    }.show()
                 }
             }
         }

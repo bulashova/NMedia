@@ -9,14 +9,15 @@ data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
     val author: String,
-    val published: String,
     val content: String,
-    val likedByMe: Boolean = false,
+    val published: String,
     val likes: Int = 0,
-    val shares: Int = 0,
-    val views: Int = 0,
-    val videoURL: String = "",
-    val videoTitle: String = ""
+    val likedByMe: Boolean = false,
+    val shares: Int? = 0,
+    val views: Int? = 0,
+    val videoURL: String? = "",
+    val videoTitle: String? = ""
+
 ) {
     fun toDto(): Post = Post(
         id = id,
