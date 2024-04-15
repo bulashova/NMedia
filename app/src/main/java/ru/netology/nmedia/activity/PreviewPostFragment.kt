@@ -110,7 +110,6 @@ class PreviewPostFragment : Fragment() {
                             )
                         } != null) {
                         startActivity(chooser)
-                        viewModel.shareById(post.id)
                     } else {
                         Snackbar.make(
                             binding.root, R.string.no_apps,
