@@ -49,7 +49,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun likeById(id: Long) {
         val post = _data.value?.posts.orEmpty().find { it.id == id }
         post?.let {
-            repository.likeByIdAsync(id, object : PostRepository.Callback<Post> {
+            val likedByMe = post.likedByMe
+            repository.likeByIdAsync(id, likedByMe, object : PostRepository.Callback<Post> {
                 override fun onSuccess(result: Post) {
                     _data.postValue(
                         _data.value?.copy(posts = _data.value?.posts.orEmpty()
