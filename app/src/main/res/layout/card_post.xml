@@ -119,7 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="videoTitle,content" />
+        app:constraint_referenced_ids="videoTitle, content, attachment" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/like"
@@ -160,5 +160,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/barrierTop"
         tools:text="@sample/posts.json/data/viewCount" />
+
+    <ImageView
+        android:id="@+id/attachment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_common"
+        android:contentDescription="@string/attachment"
+        android:visibility="visible"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toBottomOf="@id/content"
+        tools:src="@drawable/podcast" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

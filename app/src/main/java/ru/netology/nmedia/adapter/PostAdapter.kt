@@ -11,6 +11,8 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.Count
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.glide.load
+import ru.netology.nmedia.glide.loadCircleCrop
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -42,8 +44,13 @@ class PostViewHolder(
     private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    private companion object {
+        const val BASE_URL = "http://10.0.2.2:9999/"
+    }
+
     fun bind(post: Post) {
         with(binding) {
+            avatar.loadCircleCrop("${BASE_URL}avatars/${post.authorAvatar}")
             author.text = post.author
             published.text = post.published
             content.text = post.content
@@ -62,6 +69,11 @@ class PostViewHolder(
                     onInteractionListener.onPlayVideo(post)
                 }
             } else group.visibility = View.GONE
+
+            if (post.attachment != null) {
+                attachment.visibility = View.VISIBLE
+                attachment.load("${BASE_URL}images/${post.attachment.url}")
+            } else attachment.visibility = View.GONE
 
             like.isChecked = post.likedByMe
             like.text = Count.formatCount(post.likes)

@@ -34,5 +34,6 @@
     <string name="no_posts">Постов пока нет</string>
     <string name="something_went_wrong">Что-то пошло не так</string>
     <string name="retry">Повторить</string>
+    <string name="attachment">Вложение</string>
 
 </resources>
