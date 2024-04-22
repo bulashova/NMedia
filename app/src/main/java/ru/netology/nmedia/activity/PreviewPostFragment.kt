@@ -16,6 +16,8 @@ import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentPreviewPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.glide.load
+import ru.netology.nmedia.glide.loadCircleCrop
 import ru.netology.nmedia.util.LongArg
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -25,6 +27,7 @@ class PreviewPostFragment : Fragment() {
     companion object {
         var Bundle.longArg: Long by LongArg
         var Bundle.textArg: String? by StringArg
+        const val BASE_URL = "http://10.0.2.2:9999/"
     }
 
     private val Fragment.packageManager get() = activity?.packageManager
@@ -69,6 +72,7 @@ class PreviewPostFragment : Fragment() {
                 author.text = post.author
                 published.text = post.published
                 content.text = post.content
+                avatar.loadCircleCrop("${BASE_URL}avatars/${post.authorAvatar}")
 
                 if (!post.videoURL.isNullOrBlank()) {
                     group.visibility = View.VISIBLE
@@ -84,6 +88,11 @@ class PreviewPostFragment : Fragment() {
                         onPlayVideo(post)
                     }
                 } else group.visibility = View.GONE
+
+                if (post.attachment != null) {
+                    attachment.visibility = View.VISIBLE
+                    attachment.load("${BASE_URL}images/${post.attachment.url}")
+                } else attachment.visibility = View.GONE
 
                 like.isChecked = post.likedByMe
                 like.text = Count.formatCount(post.likes)
