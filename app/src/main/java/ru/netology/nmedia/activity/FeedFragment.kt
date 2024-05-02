@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -139,6 +140,18 @@ class FeedFragment : Fragment() {
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.loadPosts()
             binding.swipeRefresh.isRefreshing = false
+        }
+
+        val toast = Toast.makeText(this.activity, R.string.respons_is_expected, Toast.LENGTH_SHORT)
+        viewModel.errorLoad.observe(viewLifecycleOwner) {
+            toast.show()
+            viewModel.loadPosts()
+        }
+
+        val toastSaving = Toast.makeText(this.activity, R.string.saving, Toast.LENGTH_SHORT)
+        viewModel.errorSave.observe(viewLifecycleOwner) {
+            toastSaving.show()
+            viewModel.saveAsync()
         }
         return binding.root
     }

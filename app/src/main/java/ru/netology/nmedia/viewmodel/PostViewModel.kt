@@ -32,16 +32,24 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val edited = MutableLiveData(empty)
 
+    private val _errorLoad = SingleLiveEvent<Exception?>()
+    val errorLoad: SingleLiveEvent<Exception?>
+        get() = _errorLoad
+
+    private var _errorSave = SingleLiveEvent<Exception?>()
+    val errorSave: SingleLiveEvent<Exception?>
+        get() = _errorSave
+
     fun loadPosts() {
         _data.value = FeedModel(loading = true)
         repository.getAllAsync(
             object : PostRepository.Callback<List<Post>> {
                 override fun onSuccess(result: List<Post>) {
-                    _data.postValue(FeedModel(posts = result, empty = result.isEmpty()))
+                    _data.value = FeedModel(posts = result, empty = result.isEmpty())
                 }
 
                 override fun onError(exception: Exception) {
-                    _data.postValue(FeedModel(error = true))
+                    _errorLoad.value = Exception(exception)
                 }
             }
         )
@@ -64,7 +72,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 override fun onError(exception: Exception) {
-                    _data.postValue(FeedModel(error = true))
+                    _data.value = FeedModel(error = true)
                 }
             })
         }
@@ -82,7 +90,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(exception: Exception) {
-                _data.postValue(_data.value?.copy(posts = old))
+                _data.value = FeedModel(error = true)
             }
         })
     }
@@ -97,17 +105,39 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         edited.value?.let {
-            repository.saveAsync(it.copy(content = text), object : PostRepository.Callback<Post> {
-                override fun onSuccess(result: Post) {
-                    _postCreated.postValue(Unit)
-                }
+            repository.saveAsync(it.copy(content = text),
+                object : PostRepository.Callback<Post> {
 
-                override fun onError(exception: Exception) {
-                    _data.postValue(FeedModel(error = true))
-                }
-            })
+                    override fun onError(exception: Exception) {
+                        requireNotNull(edited.value).content = text
+                        _errorSave.value = Exception(exception)
+                    }
+
+                    override fun onSuccess(result: Post) {
+                        _postCreated.postValue(Unit)
+                        _errorSave = SingleLiveEvent()
+                        edited.value = empty
+                    }
+                })
         }
-        edited.value = empty
+    }
+
+    fun saveAsync() {
+        edited.value?.let {
+            repository.saveAsync(
+                it, object : PostRepository.Callback<Post> {
+                    override fun onError(exception: Exception) {
+                        requireNotNull(edited.value).content = it.content
+                        _errorSave.value = Exception(exception)
+                    }
+
+                    override fun onSuccess(result: Post) {
+                        _postCreated.postValue(Unit)
+                        _errorSave = SingleLiveEvent()
+                        edited.value = empty
+                    }
+                })
+        }
     }
 
     fun cancel() {

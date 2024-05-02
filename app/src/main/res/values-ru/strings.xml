@@ -22,7 +22,6 @@
     <string name="video">Видео</string>
     <string name="play_video">Воспроизвести видео</string>
     <string name="new_post">Новый Пост</string>
-
     <string name="google_play_unavailable">Google Api Недоступно</string>
     <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
     <string name="channel_remote_name">Уведомления с сервера</string>
@@ -30,10 +29,12 @@
     <string name="notification_new_post">%1$s опубликовал(а) новый пост:</string>
     <string name="unknown_notification_type">Неизвеcтный тип уведомления</string>
     <string name="try_updating">Попробуйте обновить приложение</string>
-
     <string name="no_posts">Постов пока нет</string>
     <string name="something_went_wrong">Что-то пошло не так</string>
     <string name="retry">Повторить</string>
     <string name="attachment">Вложение</string>
 
+    <string name="respons_is_expected">Ожидается ответ от сервера</string>
+    <string name="saving">Выполняется сохранение на сервере</string>
+    <string name="connection_error">Ошибка подключения к серверу</string>
 </resources>

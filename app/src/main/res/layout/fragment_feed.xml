@@ -59,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_common"
-        android:text="@string/something_went_wrong"
+        android:text="@string/connection_error"
         app:layout_constraintBottom_toTopOf="@id/retry"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
