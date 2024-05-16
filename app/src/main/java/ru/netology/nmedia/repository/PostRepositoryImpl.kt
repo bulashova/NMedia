@@ -50,6 +50,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
                 .run { if (!likedByMe) likeByMe(id) else unLikeByMe(id) }
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
         } catch (e: IOException) {
+            dao.likeById(id)
             throw NetworkError
         } catch (e: Exception) {
             throw UnknownError
