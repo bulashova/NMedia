@@ -161,16 +161,35 @@
         app:layout_constraintTop_toTopOf="@id/barrierTop"
         tools:text="@sample/posts.json/data/viewCount" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/actionGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="menu, like, share, view" />
+
     <ImageView
         android:id="@+id/attachment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_common"
-        android:contentDescription="@string/attachment"
-        android:visibility="visible"
         android:adjustViewBounds="true"
+        android:contentDescription="@string/attachment"
         android:scaleType="fitCenter"
+        android:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/content"
         tools:src="@drawable/podcast" />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/unsaved"
+        style="@style/Widget.AppTheme.Error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/description_post_not_saved_on_the_server"
+        android:visibility="gone"
+        app:icon="@drawable/ic_error_outline_24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -106,15 +105,37 @@ class FeedFragment : Fragment() {
                         longArg = post.id
                     })
             }
+
+            override fun onRetrySave(post: Post) {
+                Snackbar.make(
+                    binding.root,
+                    R.string.description_post_not_saved_on_the_server,
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                    .setAction(R.string.retry) {
+                        viewModel.retrySave(post)
+                    }
+                    .show()
+            }
         }
         )
 
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
-            binding.errorGroup.isVisible = state.error
-            binding.progress.isVisible = state.loading
             binding.emptyText.isVisible = state.empty
+        }
+
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            binding.swipeRefresh.isRefreshing = state.refreshing
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.retry) {
+                        viewModel.refreshPosts()
+                    }
+                    .show()
+            }
         }
 
         binding.retry.setOnClickListener {
@@ -138,20 +159,7 @@ class FeedFragment : Fragment() {
                 })
         }
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.loadPosts()
-            binding.swipeRefresh.isRefreshing = false
-        }
-
-        val toast = Toast.makeText(this.activity, R.string.respons_is_expected, Toast.LENGTH_SHORT)
-        viewModel.errorLoad.observe(viewLifecycleOwner) {
-            toast.show()
-            viewModel.loadPosts()
-        }
-
-        val toastSaving = Toast.makeText(this.activity, R.string.saving, Toast.LENGTH_SHORT)
-        viewModel.errorSave.observe(viewLifecycleOwner) {
-            toastSaving.show()
-            viewModel.saveAsync()
+            viewModel.refreshPosts()
         }
         return binding.root
     }

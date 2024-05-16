@@ -65,10 +65,12 @@ dependencies {
     def okhttp_version = "4.12.0"
     def swiperefreshlayout_version = "1.1.0"
     def glide_version = "4.16.0"
-
     def retrofit_version = "2.10.0"
     def retrofitgson_version = "2.10.0"
     def okhttplogging_version = "4.12.0"
+
+    def coroutines_version = "1.8.0"
+    def coordinatorlayout_version = "1.2.0"
 
     implementation "androidx.core:core-ktx:$core_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
@@ -94,8 +96,11 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swiperefreshlayout_version"
     implementation "com.github.bumptech.glide:glide:$glide_version"
-
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitgson_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttplogging_version"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$coordinatorlayout_version"
 }

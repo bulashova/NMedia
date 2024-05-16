@@ -29,4 +29,10 @@
         <item name="backgroundTint">@color/white</item>
     </style>
 
+    <style name="Widget.AppTheme.Error" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
+        <item name="iconTint">@color/red</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
 </resources>

@@ -33,8 +33,10 @@
     <string name="something_went_wrong">Что-то пошло не так</string>
     <string name="retry">Повторить</string>
     <string name="attachment">Вложение</string>
-
     <string name="respons_is_expected">Ожидается ответ от сервера</string>
     <string name="saving">Выполняется сохранение на сервере</string>
     <string name="connection_error">Ошибка подключения к серверу</string>
+
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="description_post_not_saved_on_the_server">Пост не сохранен на сервере</string>
 </resources>
