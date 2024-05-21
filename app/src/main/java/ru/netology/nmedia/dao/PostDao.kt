@@ -2,17 +2,25 @@ package ru.netology.nmedia.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
+
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): LiveData<List<PostEntity>>
 
-    @Upsert
-    fun save(post: PostEntity): Long
+    @Query("SELECT * FROM PostEntity WHERE id = :id")
+    suspend fun getById(id: Long): PostEntity
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(post: PostEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(posts: List<PostEntity>)
 
     @Query(
         """
@@ -22,7 +30,7 @@ interface PostDao {
                 WHERE id = :id;
     """
     )
-    fun likeById(id: Long)
+    suspend fun likeById(id: Long)
 
     @Query(
         """
@@ -31,8 +39,8 @@ interface PostDao {
            WHERE id = :id;
         """
     )
-    fun shareById(id: Long)
+    suspend fun shareById(id: Long)
 
     @Query("DELETE FROM PostEntity WHERE id = :id")
-    fun removeById(id: Long)
+    suspend fun removeById(id: Long)
 }

@@ -12,7 +12,8 @@ data class Post(
     val videoURL: String? = "",
     val videoTitle: String? = "",
     val authorAvatar: String,
-    val attachment: Attachment? = null
+    val attachment: Attachment? = null,
+    var savedOnTheServer: Int = 0
 )
 
 data class Attachment(

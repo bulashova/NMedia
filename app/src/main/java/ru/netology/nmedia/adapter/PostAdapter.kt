@@ -22,6 +22,7 @@ interface OnInteractionListener {
     fun onCancel(post: Post)
     fun onPlayVideo(post: Post)
     fun onPreview(post: Post)
+    fun onRetrySave(post: Post)
 }
 
 class PostAdapter(
@@ -54,6 +55,17 @@ class PostViewHolder(
             author.text = post.author
             published.text = post.published
             content.text = post.content
+
+            if (post.savedOnTheServer == 1) {
+                actionGroup.visibility = View.VISIBLE
+                unsaved.visibility = View.GONE
+            } else {
+                actionGroup.visibility = View.GONE
+                unsaved.visibility = View.VISIBLE
+                unsaved.setOnClickListener {
+                    onInteractionListener.onRetrySave(post)
+                }
+            }
 
             if (!post.videoURL.isNullOrBlank()) {
                 group.visibility = View.VISIBLE
@@ -109,8 +121,10 @@ class PostViewHolder(
                 }.show()
             }
 
-            root.setOnClickListener {
-                onInteractionListener.onPreview(post)
+            if (post.savedOnTheServer == 1) {
+                root.setOnClickListener {
+                    onInteractionListener.onPreview(post)
+                }
             }
         }
     }

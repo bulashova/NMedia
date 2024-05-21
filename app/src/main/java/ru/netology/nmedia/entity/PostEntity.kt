@@ -17,7 +17,8 @@ data class PostEntity(
     val views: Int? = 0,
     val videoURL: String? = "",
     val videoTitle: String? = "",
-    val authorAvatar: String
+    val authorAvatar: String,
+    var savedOnTheServer: Int = 1,
 ) {
     fun toDto(): Post = Post(
         id = id,
@@ -30,7 +31,8 @@ data class PostEntity(
         views = views,
         videoURL = videoURL,
         videoTitle = videoTitle,
-        authorAvatar = authorAvatar
+        authorAvatar = authorAvatar,
+        savedOnTheServer = savedOnTheServer
     )
 
     companion object {
@@ -46,8 +48,12 @@ data class PostEntity(
                 views = views,
                 videoURL = videoURL,
                 videoTitle = videoTitle,
-                authorAvatar = authorAvatar
+                authorAvatar = authorAvatar,
+                savedOnTheServer = savedOnTheServer
             )
         }
     }
 }
+
+fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
+fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)
