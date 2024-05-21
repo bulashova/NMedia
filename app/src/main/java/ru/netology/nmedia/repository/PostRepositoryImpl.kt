@@ -53,6 +53,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
             dao.likeById(id)
             throw NetworkError
         } catch (e: Exception) {
+            dao.likeById(id)
             throw UnknownError
         }
     }
