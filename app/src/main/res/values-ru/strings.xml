@@ -36,7 +36,7 @@
     <string name="respons_is_expected">Ожидается ответ от сервера</string>
     <string name="saving">Выполняется сохранение на сервере</string>
     <string name="connection_error">Ошибка подключения к серверу</string>
-
     <string name="error_loading">Ошибка загрузки</string>
     <string name="description_post_not_saved_on_the_server">Пост не сохранен на сервере</string>
+    <string name="recent_entries_fab">Свежие записи</string>
 </resources>

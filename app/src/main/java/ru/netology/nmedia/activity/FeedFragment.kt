@@ -3,6 +3,7 @@ package ru.netology.nmedia.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
@@ -142,14 +144,24 @@ class FeedFragment : Fragment() {
             viewModel.loadPosts()
         }
 
-        viewModel.data.observe(viewLifecycleOwner) {
-            val newPost = adapter.currentList.size < viewModel.data.value?.posts?.size!!
-            adapter.submitList(viewModel.data.value?.posts) {
-                if (newPost) {
-                    binding.list.smoothScrollToPosition(0)
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            Log.d("FeedFragment", "Newer count: $it")
+            if (it > 0) {
+                binding.recentEntries.visibility = View.VISIBLE
+                binding.recentEntries.setOnClickListener {
+                    viewModel.loadHiddenPosts()
+                    binding.recentEntries.visibility = View.GONE
                 }
             }
         }
+
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.list.smoothScrollToPosition(0)
+                }
+            }
+        })
 
         binding.newPostButton.setOnClickListener {
             viewModel.cancel()

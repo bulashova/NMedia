@@ -4,9 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
@@ -30,9 +33,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(application).postDao())
 
-    private val _data = repository.data.map(::FeedModel)
-    val data: LiveData<FeedModel>
-        get() = _data
+    val data = repository.data
+        .map(::FeedModel)
+        .asLiveData(Dispatchers.Default)
+
+    val dataWithHidden = repository.dataWithHidden
+        .map(::FeedModel)
+        .asLiveData(Dispatchers.Default)
 
     private val _dataState = MutableLiveData(FeedModelState())
     val dataState: LiveData<FeedModelState>
@@ -44,10 +51,26 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val edited = MutableLiveData(empty)
 
+    val newerCount: LiveData<Int> = dataWithHidden.switchMap {
+        val newerId = it.posts.firstOrNull()?.id ?: 0L
+        repository.getNewerCount(newerId)
+            .asLiveData(Dispatchers.Default)
+    }
+
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
             repository.getAll()
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
+
+    fun loadHiddenPosts() = viewModelScope.launch {
+        try {
+            _dataState.value = FeedModelState(loading = true)
+            repository.getHidden()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
@@ -65,7 +88,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun likeById(id: Long) = viewModelScope.launch {
-        val post = _data.value?.posts.orEmpty().find { it.id == id }
+        val post = data.value?.posts.orEmpty().find { it.id == id }
         post?.let {
             val likedByMe = post.likedByMe
             try {

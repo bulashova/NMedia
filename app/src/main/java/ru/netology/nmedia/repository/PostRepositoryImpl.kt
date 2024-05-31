@@ -1,6 +1,12 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.map
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Post
@@ -8,6 +14,7 @@ import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.IOException
@@ -15,7 +22,13 @@ import java.io.IOException
 class PostRepositoryImpl(private val dao: PostDao) :
     PostRepository {
 
-    override val data = dao.getAll().map(List<PostEntity>::toDto)
+    override val data: Flow<List<Post>> = dao.getAllVisible()
+        .map(List<PostEntity>::toDto)
+        .flowOn(Dispatchers.Default)
+
+    override val dataWithHidden: Flow<List<Post>> = dao.getAll()
+        .map(List<PostEntity>::toDto)
+        .flowOn(Dispatchers.Default)
 
     override suspend fun getAll() {
         try {
@@ -24,6 +37,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
             val posts = response.body() ?: throw ApiError(response.code(), response.message())
             posts.map { it.savedOnTheServer = 1 }
             dao.insert(posts.toEntity())
+            dao.showAll()
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -113,6 +127,30 @@ class PostRepositoryImpl(private val dao: PostDao) :
             throw NetworkError
         } catch (e: Exception) {
             throw UnknownError
+        }
+    }
+
+    override fun getNewerCount(newerId: Long): Flow<Int> = flow {
+        while (true) {
+            delay(10_000L)
+            val response = ApiService.retrofitService.getNewer(newerId)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            body.map { it.savedOnTheServer = 1 }
+            dao.insert(body.toEntity(false))
+            emit(dao.countHidden())
+        }
+    }
+        .catch { e -> throw AppError.from(e) }
+        .flowOn(Dispatchers.Default)
+
+    override suspend fun getHidden() {
+        try {
+            dao.showAll()
+        } catch (e: Exception) {
+            throw AppError.from(e)
         }
     }
 }

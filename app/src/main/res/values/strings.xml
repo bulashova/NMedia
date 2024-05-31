@@ -35,7 +35,7 @@
     <string name="respons_is_expected">A response is expected from the server</string>
     <string name="saving">Saving is in progress on the server</string>
     <string name="connection_error">Server connection error</string>
-
     <string name="error_loading">Error_loading</string>
     <string name="description_post_not_saved_on_the_server">Post not saved on the server</string>
+    <string name="recent_entries_fab">Recent entries</string>
 </resources>
