@@ -1,6 +1,7 @@
 package ru.netology.nmedia.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
 
 interface PostRepository {
@@ -16,4 +17,6 @@ interface PostRepository {
     suspend fun retrySave(post: Post)
     fun getNewerCount(newerId: Long): Flow<Int>
     suspend fun getHidden()
+    suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
+    suspend fun retrySaveWithAttachment(post: Post, upload: MediaUpload)
 }

@@ -91,7 +91,14 @@ class PreviewPostFragment : Fragment() {
 
                 if (post.attachment != null) {
                     attachment.visibility = View.VISIBLE
-                    attachment.load("${BASE_URL}images/${post.attachment.url}")
+                    attachment.load("${BASE_URL}media/${post.attachment.url}")
+                    attachment.setOnClickListener {
+                        findNavController().navigate(
+                            R.id.action_previewPostFragment_to_previewAttachmentFragment,
+                            Bundle().apply {
+                                textArg = requireNotNull(post.attachment).url
+                            })
+                    }
                 } else attachment.visibility = View.GONE
 
                 like.isChecked = post.likedByMe

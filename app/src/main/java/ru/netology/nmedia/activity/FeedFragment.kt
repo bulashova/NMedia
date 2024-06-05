@@ -119,6 +119,14 @@ class FeedFragment : Fragment() {
                     }
                     .show()
             }
+
+            override fun onPreviewAttachment(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_previewAttachmentFragment,
+                    Bundle().apply {
+                        textArg = requireNotNull(post.attachment).url
+                    })
+            }
         }
         )
 

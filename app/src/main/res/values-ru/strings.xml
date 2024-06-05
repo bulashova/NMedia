@@ -39,4 +39,11 @@
     <string name="error_loading">Ошибка загрузки</string>
     <string name="description_post_not_saved_on_the_server">Пост не сохранен на сервере</string>
     <string name="recent_entries_fab">Свежие записи</string>
+
+    <string name="menu_save">Сохранить</string>
+    <string name="description_select_photo">Выбрать фото</string>
+    <string name="description_take_photo">Сделать фото</string>
+    <string name="description_photo">Фото</string>
+    <string name="remove">Удалить</string>
+    <string name="description_back">Назад</string>
 </resources>
