@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_feedFragment_to_previewPostFragment"
             app:destination="@id/previewPostFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_previewAttachmentFragment"
+            app:destination="@id/previewAttachmentFragment" />
     </fragment>
     <fragment
         android:id="@+id/newAndEditPostFragment"
@@ -36,5 +39,20 @@
         <action
             android:id="@+id/action_previewPostFragment_to_feedFragment"
             app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_previewPostFragment_to_previewAttachmentFragment"
+            app:destination="@id/previewAttachmentFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/previewAttachmentFragment"
+        android:name="ru.netology.nmedia.activity.PreviewAttachmentFragment"
+        android:label="fragment_preview_attachment"
+        tools:layout="@layout/fragment_preview_attachment" >
+        <action
+            android:id="@+id/action_previewAttachmentFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_previewAttachmentFragment_to_previewPostFragment"
+            app:destination="@id/previewPostFragment" />
     </fragment>
 </navigation>

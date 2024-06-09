@@ -23,6 +23,7 @@ interface OnInteractionListener {
     fun onPlayVideo(post: Post)
     fun onPreview(post: Post)
     fun onRetrySave(post: Post)
+    fun onPreviewAttachment(post: Post)
 }
 
 class PostAdapter(
@@ -84,7 +85,10 @@ class PostViewHolder(
 
             if (post.attachment != null) {
                 attachment.visibility = View.VISIBLE
-                attachment.load("${BASE_URL}images/${post.attachment.url}")
+                attachment.load("${BASE_URL}media/${post.attachment.url}")
+                attachment.setOnClickListener {
+                    onInteractionListener.onPreviewAttachment(post)
+                }
             } else attachment.visibility = View.GONE
 
             like.isChecked = post.likedByMe
