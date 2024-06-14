@@ -19,6 +19,7 @@ import ru.netology.nmedia.activity.NewAndEditPostFragment.Companion.textArg
 import ru.netology.nmedia.activity.PreviewPostFragment.Companion.longArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -37,7 +38,11 @@ class FeedFragment : Fragment() {
 
         val adapter = PostAdapter(object : OnInteractionListener {
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                if (AppAuth.getInstance().state.value?.token != null) {
+                    viewModel.likeById(post.id)
+                } else {
+                    findNavController().navigate(R.id.action_feedFragment_to_authDialogFragment)
+                }
             }
 
             override fun onShare(post: Post) {
@@ -172,11 +177,14 @@ class FeedFragment : Fragment() {
         })
 
         binding.newPostButton.setOnClickListener {
-            viewModel.cancel()
-            findNavController().navigate(R.id.action_feedFragment_to_newAndEditPostFragment,
-                Bundle().apply {
-                    longArg = 0L
-                })
+            if (AppAuth.getInstance().state.value?.token != null) {
+                viewModel.cancel()
+                findNavController().navigate(R.id.action_feedFragment_to_newAndEditPostFragment,
+                    Bundle().apply {
+                        longArg = 0L
+                    })
+            } else
+                findNavController().navigate(R.id.action_feedFragment_to_authDialogFragment)
         }
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refreshPosts()

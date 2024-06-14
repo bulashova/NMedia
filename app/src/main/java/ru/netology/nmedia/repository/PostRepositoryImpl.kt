@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.api.ApiService
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
@@ -42,6 +44,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val posts = response.body() ?: throw ApiError(response.code(), response.message())
             posts.map { it.savedOnTheServer = 1 }
+            posts.map{ it.likedByMe = it.likes != 0}
             dao.insert(posts.toEntity())
             dao.showAll()
         } catch (e: IOException) {
@@ -201,4 +204,69 @@ class PostRepositoryImpl(private val dao: PostDao) :
             throw UnknownError
         }
     }
+
+    override suspend fun updateUser(login: String, pass: String){
+        try {
+            val response = ApiService.retrofitService.updateUser(login, pass)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            println(response.body())
+            response.body() ?: throw ApiError(response.code(), response.message())
+            response.body()?.let {
+                AppAuth.getInstance().setAuth(it.id, it.token)
+            }
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun registerUser(login: String, pass: String, name: String){
+        try {
+            val response = ApiService.retrofitService.registerUser(login, pass, name)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            println(response.body())
+            response.body() ?: throw ApiError(response.code(), response.message())
+            response.body()?.let {
+                AppAuth.getInstance().setAuth(it.id, it.token)
+            }
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+   override suspend fun registerWithPhoto(login: String, pass: String, name: String, upload: MediaUpload){
+       try {
+           val part = MultipartBody.Part.createFormData(
+               "file",
+               upload.file.name,
+               upload.file.asRequestBody()
+           )
+
+           val response = ApiService.retrofitService.registerWithPhoto(
+               login.toRequestBody(),
+               pass.toRequestBody(),
+               name.toRequestBody(),
+               part)
+           if (!response.isSuccessful) {
+               throw ApiError(response.code(), response.message())
+           }
+           println(response.body())
+           response.body() ?: throw ApiError(response.code(), response.message())
+           response.body()?.let {
+               AppAuth.getInstance().setAuthWithPhoto(it.id, it.token, it.avatar)
+           }
+       } catch (e: IOException) {
+           throw NetworkError
+       } catch (e: Exception) {
+           throw UnknownError
+       }
+   }
 }

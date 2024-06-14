@@ -19,6 +19,18 @@
         <action
             android:id="@+id/action_feedFragment_to_previewAttachmentFragment"
             app:destination="@id/previewAttachmentFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_authFragment"
+            app:destination="@id/authFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_authDialogFragment"
+            app:destination="@id/authDialogFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_signOutDialogFragment"
+            app:destination="@id/signOutDialogFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
     </fragment>
     <fragment
         android:id="@+id/newAndEditPostFragment"
@@ -28,6 +40,9 @@
         <action
             android:id="@+id/action_newAndEditPostFragment_to_feedFragment"
             app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_newAndEditPostFragment_to_signOutDialogFragment"
+            app:destination="@id/signOutDialogFragment" />
     </fragment>
     <fragment
         android:id="@+id/previewPostFragment"
@@ -54,5 +69,38 @@
         <action
             android:id="@+id/action_previewAttachmentFragment_to_previewPostFragment"
             app:destination="@id/previewPostFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="ru.netology.nmedia.activity.AuthFragment"
+        android:label="AuthFragment" >
+        <action
+            android:id="@+id/action_authFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/authDialogFragment"
+        android:name="ru.netology.nmedia.activity.AuthDialogFragment"
+        android:label="AuthDialogFragment" >
+        <action
+            android:id="@+id/action_authDialogFragment_to_authFragment"
+            app:destination="@id/authFragment" />
+    </dialog>
+    <dialog
+        android:id="@+id/signOutDialogFragment"
+        android:name="ru.netology.nmedia.activity.SignOutDialogFragment"
+        android:label="SignOutDialogFragment" >
+        <action
+            android:id="@+id/action_signOutDialogFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+    </dialog>
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="ru.netology.nmedia.activity.SignUpFragment"
+        android:label="fragment_sign_up"
+        tools:layout="@layout/fragment_sign_up" >
+        <action
+            android:id="@+id/action_signUpFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
     </fragment>
 </navigation>

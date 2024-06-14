@@ -19,4 +19,7 @@ interface PostRepository {
     suspend fun getHidden()
     suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
     suspend fun retrySaveWithAttachment(post: Post, upload: MediaUpload)
+    suspend fun updateUser(login: String, pass: String)
+    suspend fun registerUser(login: String, pass: String, name: String)
+    suspend fun registerWithPhoto(login: String, pass: String, name: String, upload: MediaUpload)
 }

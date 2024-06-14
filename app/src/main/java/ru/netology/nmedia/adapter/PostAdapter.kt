@@ -4,11 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.Count
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.glide.load
@@ -97,12 +99,19 @@ class PostViewHolder(
             view.text = post.views?.let { Count.formatCount(it) }
 
             like.setOnClickListener {
-                onInteractionListener.onLike(post)
+                if (AppAuth.getInstance().state.value != null) {
+                    onInteractionListener.onLike(post)
+                } else {
+                    onInteractionListener.onLike(post)
+                    like.isChecked = post.likedByMe
+                }
             }
 
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
+
+            menu.isVisible = post.ownedByMe && post.savedOnTheServer == 1
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
