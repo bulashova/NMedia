@@ -44,7 +44,6 @@ class PostRepositoryImpl(private val dao: PostDao) :
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val posts = response.body() ?: throw ApiError(response.code(), response.message())
             posts.map { it.savedOnTheServer = 1 }
-            posts.map{ it.likedByMe = it.likes != 0}
             dao.insert(posts.toEntity())
             dao.showAll()
         } catch (e: IOException) {
@@ -205,7 +204,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
         }
     }
 
-    override suspend fun updateUser(login: String, pass: String){
+    override suspend fun updateUser(login: String, pass: String) {
         try {
             val response = ApiService.retrofitService.updateUser(login, pass)
             if (!response.isSuccessful) {
@@ -224,7 +223,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
         }
     }
 
-    override suspend fun registerUser(login: String, pass: String, name: String){
+    override suspend fun registerUser(login: String, pass: String, name: String) {
         try {
             val response = ApiService.retrofitService.registerUser(login, pass, name)
             if (!response.isSuccessful) {
@@ -242,31 +241,37 @@ class PostRepositoryImpl(private val dao: PostDao) :
         }
     }
 
-   override suspend fun registerWithPhoto(login: String, pass: String, name: String, upload: MediaUpload){
-       try {
-           val part = MultipartBody.Part.createFormData(
-               "file",
-               upload.file.name,
-               upload.file.asRequestBody()
-           )
+    override suspend fun registerWithPhoto(
+        login: String,
+        pass: String,
+        name: String,
+        upload: MediaUpload
+    ) {
+        try {
+            val part = MultipartBody.Part.createFormData(
+                "file",
+                upload.file.name,
+                upload.file.asRequestBody()
+            )
 
-           val response = ApiService.retrofitService.registerWithPhoto(
-               login.toRequestBody(),
-               pass.toRequestBody(),
-               name.toRequestBody(),
-               part)
-           if (!response.isSuccessful) {
-               throw ApiError(response.code(), response.message())
-           }
-           println(response.body())
-           response.body() ?: throw ApiError(response.code(), response.message())
-           response.body()?.let {
-               AppAuth.getInstance().setAuthWithPhoto(it.id, it.token, it.avatar)
-           }
-       } catch (e: IOException) {
-           throw NetworkError
-       } catch (e: Exception) {
-           throw UnknownError
-       }
-   }
+            val response = ApiService.retrofitService.registerWithPhoto(
+                login.toRequestBody(),
+                pass.toRequestBody(),
+                name.toRequestBody(),
+                part
+            )
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            println(response.body())
+            response.body() ?: throw ApiError(response.code(), response.message())
+            response.body()?.let {
+                AppAuth.getInstance().setAuthWithPhoto(it.id, it.token, it.avatar)
+            }
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
 }

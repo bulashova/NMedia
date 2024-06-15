@@ -7,7 +7,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 
-class AuthDialogFragment: DialogFragment() {
+class AuthDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
@@ -16,7 +16,7 @@ class AuthDialogFragment: DialogFragment() {
                 .setIcon(R.drawable.ic_netology_48dp)
                 .setCancelable(true)
                 .setPositiveButton(R.string.ok) { _, _ ->
-                    findNavController().navigate(R.id.authFragment)
+                    findNavController().navigate(R.id.action_authDialogFragment_to_authFragment)
                 }
                 .setNegativeButton(
                     R.string.no

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -21,12 +20,6 @@ class AuthFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                findNavController().navigate(R.id.action_authFragment_to_feedFragment)
-            }
-        })
-
         val viewModel by activityViewModels<SignInViewModel>()
         val binding = FragmentAuthBinding.inflate(layoutInflater, container, false)
 
@@ -37,7 +30,6 @@ class AuthFragment : Fragment() {
                 val login = requireNotNull(login.text).toString()
                 val pass = requireNotNull(pass.text).toString()
                 viewModel.updateUser(login, pass)
-                findNavController().navigate(R.id.action_authFragment_to_feedFragment)
             }
             back.setOnClickListener {
                 findNavController().navigateUp()
@@ -48,12 +40,16 @@ class AuthFragment : Fragment() {
             if (state.error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
                     .setAction(R.string.retry) {
-                        findNavController().navigate(R.id.action_authFragment_to_feedFragment)
+                        findNavController().navigateUp()
                     }
                     .show()
             }
         }
 
+        viewModel.auth.observe(viewLifecycleOwner) {
+            if (viewModel.authenticated)
+                findNavController().navigateUp()
+        }
         return binding.root
     }
 }

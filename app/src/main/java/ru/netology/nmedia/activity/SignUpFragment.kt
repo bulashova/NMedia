@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
@@ -25,12 +24,6 @@ class SignUpFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                findNavController().navigate(R.id.action_authFragment_to_feedFragment)
-            }
-        })
-
         val viewModel by activityViewModels<SignUpViewModel>()
         val binding = FragmentSignUpBinding.inflate(layoutInflater, container, false)
 
@@ -45,7 +38,6 @@ class SignUpFragment : Fragment() {
                 val pass = requireNotNull(pass.text).toString()
                 val name = requireNotNull(name.text).toString()
                 viewModel.registerWithPhoto(login, pass, name)
-                findNavController().navigate(R.id.action_signUpFragment_to_feedFragment)
             }
             back.setOnClickListener {
                 findNavController().navigateUp()
@@ -87,10 +79,15 @@ class SignUpFragment : Fragment() {
             if (state.error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
                     .setAction(R.string.retry) {
-                        findNavController().navigate(R.id.action_signUpFragment_to_feedFragment)
+                        findNavController().navigateUp()
                     }
                     .show()
             }
+        }
+
+        viewModel.auth.observe(viewLifecycleOwner) {
+            if (viewModel.authenticated)
+                findNavController().navigateUp()
         }
 
         return binding.root

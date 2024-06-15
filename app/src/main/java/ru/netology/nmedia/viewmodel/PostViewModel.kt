@@ -50,6 +50,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 FeedModel(posts.map {
                     it.copy(
                         ownedByMe = it.authorId == auth?.id,
+                        likedByMe = it.likedByMe && auth?.id != 0L
                     )
                 })
             }

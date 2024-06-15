@@ -53,7 +53,7 @@ class NewAndEditPostFragment : Fragment() {
                         println("text saved")
                     }
                 }
-                findNavController().navigate(R.id.feedFragment)
+                findNavController().navigateUp()
             }
         })
 
@@ -114,7 +114,7 @@ class NewAndEditPostFragment : Fragment() {
                                 viewModel.changeContentAndSave(text)
                                 viewModel.loadPosts()
                                 AndroidUtils.hideKeyboard(requireView())
-                                findNavController().navigate(R.id.feedFragment)
+                                findNavController().navigateUp()
                             } else {
                                 Snackbar.make(
                                     binding.root, R.string.error_empty_content,
