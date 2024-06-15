@@ -46,7 +46,7 @@ class NewAndEditPostFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (arguments?.longArg == 0L) {
-                    val text = requireActivity().findViewById<EditText>(R.id.content)
+                    val text = requireActivity().findViewById<EditText>(R.id.edit)
                     with(prefs?.edit()) {
                         this?.putString("saved", text.text.toString())
                         this?.apply()
