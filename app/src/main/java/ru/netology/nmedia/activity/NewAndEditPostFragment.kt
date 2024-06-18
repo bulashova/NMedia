@@ -18,17 +18,17 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewAndEditPostBinding
+import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.AndroidUtils.focusAndShowKeyboard
 import ru.netology.nmedia.util.AndroidUtils.showTheKeyboardNow
 import ru.netology.nmedia.util.LongArg
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
-import com.github.dhaval2404.imagepicker.ImagePicker
-import ru.netology.nmedia.util.AndroidUtils
 
 class NewAndEditPostFragment : Fragment() {
 
@@ -46,7 +46,7 @@ class NewAndEditPostFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (arguments?.longArg == 0L) {
-                    val text = requireActivity().findViewById<EditText>(R.id.content)
+                    val text = requireActivity().findViewById<EditText>(R.id.edit)
                     with(prefs?.edit()) {
                         this?.putString("saved", text.text.toString())
                         this?.apply()

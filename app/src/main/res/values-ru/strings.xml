@@ -39,11 +39,26 @@
     <string name="error_loading">Ошибка загрузки</string>
     <string name="description_post_not_saved_on_the_server">Пост не сохранен на сервере</string>
     <string name="recent_entries_fab">Свежие записи</string>
-
     <string name="menu_save">Сохранить</string>
     <string name="description_select_photo">Выбрать фото</string>
     <string name="description_take_photo">Сделать фото</string>
     <string name="description_photo">Фото</string>
     <string name="remove">Удалить</string>
     <string name="description_back">Назад</string>
+
+    <string name="menu_sign_in">Войти</string>
+    <string name="menu_sign_up">Зарегистрироваться</string>
+    <string name="menu_logout">Выйти</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="enter">Войти</string>
+    <string name="sign_in_dialog">Войти в НМедиа?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="user_name">Имя</string>
+    <string name="retry_pass">Повторите пароль</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="description_avatar">Аватар</string>
+    <string name="change_photo">Изменить аватар</string>
+
 </resources>

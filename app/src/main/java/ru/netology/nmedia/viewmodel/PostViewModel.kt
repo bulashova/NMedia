@@ -9,9 +9,12 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
@@ -29,7 +32,8 @@ private val empty = Post(
     author = "",
     likedByMe = false,
     published = "",
-    authorAvatar = ""
+    authorAvatar = "",
+    authorId = 0
 )
 
 private val noPhoto = PhotoModel()
@@ -39,8 +43,19 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(application).postDao())
 
-    val data = repository.data
-        .map(::FeedModel)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val data: LiveData<FeedModel> = AppAuth.getInstance().state.flatMapLatest { auth ->
+        repository.data
+            .map { posts ->
+                FeedModel(posts.map {
+                    it.copy(
+                        ownedByMe = it.authorId == auth?.id,
+                        likedByMe = it.likedByMe && auth?.id != 0L
+                    )
+                })
+            }
+    }
+
         .asLiveData(Dispatchers.Default)
 
     val dataWithHidden = repository.dataWithHidden
