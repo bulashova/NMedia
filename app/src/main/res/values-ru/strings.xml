@@ -45,7 +45,6 @@
     <string name="description_photo">Фото</string>
     <string name="remove">Удалить</string>
     <string name="description_back">Назад</string>
-
     <string name="menu_sign_in">Войти</string>
     <string name="menu_sign_up">Зарегистрироваться</string>
     <string name="menu_logout">Выйти</string>
@@ -61,4 +60,5 @@
     <string name="description_avatar">Аватар</string>
     <string name="change_photo">Изменить аватар</string>
 
+    <string name="notification_from_the_server">Уведомление от сервера</string>
 </resources>
