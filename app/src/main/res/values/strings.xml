@@ -44,7 +44,6 @@
     <string name="description_photo">Photo</string>
     <string name="remove">Remove</string>
     <string name="description_back">Back</string>
-
     <string name="menu_sign_in">Sign In</string>
     <string name="menu_sign_up">Sign Up</string>
     <string name="menu_logout">Sign Out</string>
@@ -60,4 +59,5 @@
     <string name="description_avatar">Avatar</string>
     <string name="change_photo">Change avatar</string>
 
+    <string name="notification_from_the_server">Notification from the server</string>
 </resources>
