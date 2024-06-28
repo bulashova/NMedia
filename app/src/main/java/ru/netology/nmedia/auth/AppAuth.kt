@@ -4,6 +4,11 @@ import android.content.Context
 import androidx.core.content.edit
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,79 +16,96 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dto.PushToken
-import ru.netology.nmedia.dto.Token
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AppAuth private constructor(context: Context) {
 
+@Singleton
+class AppAuth @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-    private val _state = MutableStateFlow<Token?>(null)
-    val state: StateFlow<Token?> = _state.asStateFlow()
+    private val idKey = "id"
+    private val tokenKey = "token"
+    private val photoKey = "photo"
+
+    private val _authStateFlow: MutableStateFlow<AuthState>
 
     init {
-        val id = prefs.getLong(ID_KEY, 0L)
-        val token = prefs.getString(TOKEN_KEY, null)
+        val id = prefs.getLong(idKey, 0)
+        val token = prefs.getString(tokenKey, null)
 
-        if (id != 0L && token != null) {
-            _state.value = Token(id, token)
+        if (id == 0L || token == null) {
+            _authStateFlow = MutableStateFlow(AuthState())
+            with(prefs.edit()) {
+                clear()
+                apply()
+            }
         } else {
-            prefs.edit { clear() }
+            _authStateFlow = MutableStateFlow(AuthState(id, token))
         }
-        sendPushToken()
+    }
+
+    val authStateFlow: StateFlow<AuthState> = _authStateFlow.asStateFlow()
+
+    @InstallIn(SingletonComponent::class)
+    @EntryPoint
+    interface AppAuthEntryPoint {
+        fun apiService(): ApiService
     }
 
     @Synchronized
     fun setAuth(id: Long, token: String) {
-        _state.value = Token(id, token)
-        prefs.edit {
-            putLong(ID_KEY, id)
-            putString(TOKEN_KEY, token)
+        _authStateFlow.value = AuthState(id, token)
+        with(prefs.edit()) {
+            putLong(idKey, id)
+            putString(tokenKey, token)
+            apply()
         }
         sendPushToken()
     }
 
     @Synchronized
     fun setAuthWithPhoto(id: Long, token: String, avatar: String) {
-        _state.value = Token(id, token)
+        _authStateFlow.value = AuthState(id, token)
         prefs.edit {
-            putLong(ID_KEY, id)
-            putString(TOKEN_KEY, token)
-            putString(PHOTO_KEY, avatar)
+            putLong(idKey, id)
+            putString(tokenKey, token)
+            putString(photoKey, avatar)
         }
         sendPushToken()
     }
 
     @Synchronized
     fun clearAuth() {
-        _state.value = null
-        prefs.edit { clear() }
+        _authStateFlow.value = AuthState()
+        with(prefs.edit()) {
+            clear()
+            apply()
+        }
         sendPushToken()
     }
 
     fun sendPushToken(token: String? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                val token = PushToken(token ?: Firebase.messaging.token.await())
-                Api.retrofitService.saveToken(token)
+                val pushToken = PushToken(token ?: Firebase.messaging.token.await())
+                getApiService(context).saveToken(pushToken)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    companion object {
-        private const val ID_KEY = "ID_KEY"
-        private const val TOKEN_KEY = "TOKEN_KEY"
-        private const val PHOTO_KEY = "PHOTO_KEY"
-        private var INSTANCE: AppAuth? = null
-
-        fun getInstance() = requireNotNull(INSTANCE) {
-            "You must call init before"
-        }
-
-        fun init(context: Context) {
-            INSTANCE = AppAuth(context.applicationContext)
-        }
+    private fun getApiService(context: Context): ApiService {
+        val hiltEntryPoint = EntryPointAccessors.fromApplication(
+            context,
+            AppAuthEntryPoint::class.java
+        )
+        return hiltEntryPoint.apiService()
     }
 }
+
+data class AuthState(val id: Long = 0, val token: String? = null)

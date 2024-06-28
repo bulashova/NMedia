@@ -8,10 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentAuthBinding
 import ru.netology.nmedia.viewmodel.SignInViewModel
 
+@AndroidEntryPoint
 class AuthFragment : Fragment() {
 
     override fun onCreateView(
@@ -46,7 +48,7 @@ class AuthFragment : Fragment() {
             }
         }
 
-        viewModel.auth.observe(viewLifecycleOwner) {
+        viewModel.data.observe(viewLifecycleOwner) {
             if (viewModel.authenticated)
                 findNavController().navigateUp()
         }
