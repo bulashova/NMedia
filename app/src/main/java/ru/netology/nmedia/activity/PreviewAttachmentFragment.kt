@@ -7,11 +7,13 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentPreviewAttachmentBinding
 import ru.netology.nmedia.glide.load
 import ru.netology.nmedia.util.StringArg
 
+@AndroidEntryPoint
 class PreviewAttachmentFragment : Fragment() {
 
     companion object {

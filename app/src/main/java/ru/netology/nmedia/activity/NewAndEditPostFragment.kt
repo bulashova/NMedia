@@ -21,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentNewAndEditPostBinding
 import ru.netology.nmedia.util.AndroidUtils
@@ -30,6 +31,7 @@ import ru.netology.nmedia.util.LongArg
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 
+@AndroidEntryPoint
 class NewAndEditPostFragment : Fragment() {
 
     companion object {

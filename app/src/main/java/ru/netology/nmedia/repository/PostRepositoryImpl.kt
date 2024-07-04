@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
@@ -26,9 +26,18 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PostRepositoryImpl(private val dao: PostDao) :
+@Singleton
+class PostRepositoryImpl @Inject constructor(
+    private val dao: PostDao,
+    private val apiService: ApiService
+) :
     PostRepository {
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override val data: Flow<List<Post>> = dao.getAllVisible()
         .map(List<PostEntity>::toDto)
@@ -40,7 +49,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
 
     override suspend fun getAll() {
         try {
-            val response = Api.retrofitService.getAll()
+            val response = apiService.getAll()
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val posts = response.body() ?: throw ApiError(response.code(), response.message())
             posts.map { it.savedOnTheServer = 1 }
@@ -55,7 +64,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
 
     override suspend fun getById(id: Long) {
         try {
-            val response = Api.retrofitService.getById(id)
+            val response = apiService.getById(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val post = response.body() ?: throw ApiError(response.code(), response.message())
         } catch (e: IOException) {
@@ -68,7 +77,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
     override suspend fun likeById(id: Long, likedByMe: Boolean) {
         dao.likeById(id)
         try {
-            val response = Api.retrofitService
+            val response = apiService
                 .run { if (!likedByMe) likeByMe(id) else unLikeByMe(id) }
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
         } catch (e: IOException) {
@@ -83,7 +92,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
     private var cacheId: Long = 10_000
     override suspend fun save(post: Post) {
         try {
-            val response = Api.retrofitService.save(post)
+            val response = apiService.save(post)
             if (!response.isSuccessful) {
                 post.savedOnTheServer = 0
                 dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
@@ -108,7 +117,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
 
     override suspend fun retrySave(post: Post) {
         try {
-            val response = Api.retrofitService.save(post.copy(id = 0L))
+            val response = apiService.save(post.copy(id = 0L))
             if (!response.isSuccessful) {
                 post.savedOnTheServer = 0
                 throw ApiError(response.code(), response.message())
@@ -127,7 +136,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
     override suspend fun removeById(id: Long) {
         dao.removeById(id)
         try {
-            val response = Api.retrofitService.removeById(id)
+            val response = apiService.removeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -141,7 +150,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
     override fun getNewerCount(newerId: Long): Flow<Int> = flow {
         while (true) {
             delay(10_000L)
-            val response = Api.retrofitService.getNewer(newerId)
+            val response = apiService.getNewer(newerId)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -191,7 +200,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
                 upload.file.name,
                 upload.file.asRequestBody()
             )
-            val response = Api.retrofitService.upload(part)
+            val response = apiService.upload(part)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -206,7 +215,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
 
     override suspend fun updateUser(login: String, pass: String) {
         try {
-            val response = Api.retrofitService.updateUser(login, pass)
+            val response = apiService.updateUser(login, pass)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -214,7 +223,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
             println(response.body())
             response.body() ?: throw ApiError(response.code(), response.message())
             response.body()?.let {
-                AppAuth.getInstance().setAuth(it.id, it.token)
+                appAuth.setAuth(it.id, it.token)
             }
         } catch (e: IOException) {
             throw NetworkError
@@ -225,14 +234,14 @@ class PostRepositoryImpl(private val dao: PostDao) :
 
     override suspend fun registerUser(login: String, pass: String, name: String) {
         try {
-            val response = Api.retrofitService.registerUser(login, pass, name)
+            val response = apiService.registerUser(login, pass, name)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
             println(response.body())
             response.body() ?: throw ApiError(response.code(), response.message())
             response.body()?.let {
-                AppAuth.getInstance().setAuth(it.id, it.token)
+                appAuth.setAuth(it.id, it.token)
             }
         } catch (e: IOException) {
             throw NetworkError
@@ -254,7 +263,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
                 upload.file.asRequestBody()
             )
 
-            val response = Api.retrofitService.registerWithPhoto(
+            val response = apiService.registerWithPhoto(
                 login.toRequestBody(),
                 pass.toRequestBody(),
                 name.toRequestBody(),
@@ -266,7 +275,7 @@ class PostRepositoryImpl(private val dao: PostDao) :
             println(response.body())
             response.body() ?: throw ApiError(response.code(), response.message())
             response.body()?.let {
-                AppAuth.getInstance().setAuthWithPhoto(it.id, it.token, it.avatar)
+                appAuth.setAuthWithPhoto(it.id, it.token, it.avatar)
             }
         } catch (e: IOException) {
             throw NetworkError

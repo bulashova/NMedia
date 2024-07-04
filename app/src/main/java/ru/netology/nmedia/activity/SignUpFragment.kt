@@ -12,10 +12,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignUpBinding
 import ru.netology.nmedia.viewmodel.SignUpViewModel
 
+@AndroidEntryPoint
 class SignUpFragment : Fragment() {
 
     override fun onCreateView(
@@ -85,7 +87,7 @@ class SignUpFragment : Fragment() {
             }
         }
 
-        viewModel.auth.observe(viewLifecycleOwner) {
+        viewModel.data.observe(viewLifecycleOwner) {
             if (viewModel.authenticated)
                 findNavController().navigateUp()
         }
