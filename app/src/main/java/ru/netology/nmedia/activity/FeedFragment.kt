@@ -3,18 +3,23 @@ package ru.netology.nmedia.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewAndEditPostFragment.Companion.textArg
 import ru.netology.nmedia.activity.PreviewPostFragment.Companion.longArg
@@ -45,7 +50,7 @@ class FeedFragment : Fragment() {
         val adapter = PostAdapter(object : OnInteractionListener {
             override fun onLike(post: Post) {
                 if (appAuth.authStateFlow.value.token != null) {
-                    viewModel.likeById(post.id)
+                    viewModel.likeById(post)
                 } else {
                     findNavController().navigate(R.id.action_feedFragment_to_authDialogFragment)
                 }
@@ -142,9 +147,22 @@ class FeedFragment : Fragment() {
         )
 
         binding.list.adapter = adapter
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
-            binding.emptyText.isVisible = state.empty
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.data.collectLatest(adapter::submitData)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collectLatest { state ->
+                    binding.swipeRefresh.isRefreshing =
+                        state.refresh is LoadState.Loading ||
+                                state.prepend is LoadState.Loading ||
+                                state.append is LoadState.Loading
+                }
+            }
         }
 
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
@@ -163,16 +181,16 @@ class FeedFragment : Fragment() {
             viewModel.loadPosts()
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) {
-            Log.d("FeedFragment", "Newer count: $it")
-            if (it > 0) {
-                binding.recentEntries.visibility = View.VISIBLE
-                binding.recentEntries.setOnClickListener {
-                    viewModel.loadHiddenPosts()
-                    binding.recentEntries.visibility = View.GONE
-                }
-            }
-        }
+//        viewModel.newerCount.observe(viewLifecycleOwner) {
+//            Log.d("FeedFragment", "Newer count: $it")
+//            if (it > 0) {
+//                binding.recentEntries.visibility = View.VISIBLE
+//                binding.recentEntries.setOnClickListener {
+//                    viewModel.loadHiddenPosts()
+//                    binding.recentEntries.visibility = View.GONE
+//                }
+//            }
+//        }
 
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {

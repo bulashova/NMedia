@@ -42,7 +42,7 @@ class PreviewPostFragment : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().navigate(R.id.action_previewPostFragment_to_feedFragment)
+                findNavController().navigateUp()
             }
         })
 
@@ -65,7 +65,7 @@ class PreviewPostFragment : Fragment() {
         }
 
         val id = requireArguments().longArg
-        val post = viewModel.data.value?.posts?.find { it.id == id }
+        val post = viewModel.getById(id)
 
         if (post == null) {
             findNavController().navigateUp()
@@ -109,7 +109,7 @@ class PreviewPostFragment : Fragment() {
                 view.text = post.views?.let { Count.formatCount(it) }
 
                 like.setOnClickListener {
-                    viewModel.likeById(post.id)
+                    viewModel.likeById(post)
                     findNavController().navigateUp()
                 }
 
