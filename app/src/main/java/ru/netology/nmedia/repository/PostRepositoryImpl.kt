@@ -1,5 +1,10 @@
 package ru.netology.nmedia.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -39,39 +44,56 @@ class PostRepositoryImpl @Inject constructor(
     @Inject
     lateinit var appAuth: AppAuth
 
-    override val data: Flow<List<Post>> = dao.getAllVisible()
-        .map(List<PostEntity>::toDto)
-        .flowOn(Dispatchers.Default)
+    override val data = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),)
+//        pagingSourceFactory = {
+//            PostPagingSource(
+//               apiService
+//            )
+//        }
+//    )
+//        .flow
+    {
+        dao.getPagingSource()
+
+    }.flow
+        .map { pagingData ->
+            pagingData
+                .map { it.toDto() }
+        }
 
     override val dataWithHidden: Flow<List<Post>> = dao.getAll()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
 
     override suspend fun getAll() {
-        try {
-            val response = apiService.getAll()
-            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-            val posts = response.body() ?: throw ApiError(response.code(), response.message())
-            posts.map { it.savedOnTheServer = 1 }
-            dao.insert(posts.toEntity())
-            dao.showAll()
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
+        if (dao.isEmpty()) {
+            try {
+                val response = apiService.getAll()
+                if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+                val posts = response.body() ?: throw ApiError(response.code(), response.message())
+                posts.map { it.savedOnTheServer = 1 }
+                dao.insert(posts.toEntity())
+                dao.showAll()
+            } catch (e: IOException) {
+                throw NetworkError
+            } catch (e: Exception) {
+                throw UnknownError
+            }
         }
     }
 
-    override suspend fun getById(id: Long) {
-        try {
-            val response = apiService.getById(id)
-            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-            val post = response.body() ?: throw ApiError(response.code(), response.message())
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+    override suspend fun getById(id: Long): LiveData<Post> {
+        return requireNotNull(dao.getById(id)).map { it.toDto() }
+//        try {
+//            val response = apiService.getById(id)
+//            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+//            val post = response.body() ?: throw ApiError(response.code(), response.message())
+//        } catch (e: IOException) {
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            throw UnknownError
+//        }
     }
 
     override suspend fun likeById(id: Long, likedByMe: Boolean) {
@@ -91,28 +113,31 @@ class PostRepositoryImpl @Inject constructor(
 
     private var cacheId: Long = 10_000
     override suspend fun save(post: Post) {
-        try {
-            val response = apiService.save(post)
-            if (!response.isSuccessful) {
-                post.savedOnTheServer = 0
-                dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
-                cacheId++
-                throw ApiError(response.code(), response.message())
-            }
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-            body.savedOnTheServer = 1
-            dao.insert(PostEntity.fromDto(body))
-        } catch (e: IOException) {
-            post.savedOnTheServer = 0
-            dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
-            cacheId++
-            throw NetworkError
-        } catch (e: Exception) {
-            post.savedOnTheServer = 0
-            dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
-            cacheId++
-            throw UnknownError
-        }
+        post.authorId = appAuth.authStateFlow.value.id
+        post.savedOnTheServer = 1
+        dao.insert(PostEntity.fromDto(post))
+//        try {
+//            val response = apiService.save(post)
+//            if (!response.isSuccessful) {
+//                post.savedOnTheServer = 0
+//                dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
+//                cacheId++
+//                throw ApiError(response.code(), response.message())
+//            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            body.savedOnTheServer = 1
+//            dao.insert(PostEntity.fromDto(body))
+//        } catch (e: IOException) {
+//            post.savedOnTheServer = 0
+//            dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
+//            cacheId++
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            post.savedOnTheServer = 0
+//            dao.insert(PostEntity.fromDto(post.copy(id = cacheId)))
+//            cacheId++
+//            throw UnknownError
+//        }
     }
 
     override suspend fun retrySave(post: Post) {
@@ -135,33 +160,47 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun removeById(id: Long) {
         dao.removeById(id)
-        try {
-            val response = apiService.removeById(id)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+//        try {
+//            val response = apiService.removeById(id)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//        } catch (e: IOException) {
+//            throw NetworkError
+//        } catch (e: Exception) {
+//            throw UnknownError
+//        }
     }
 
-    override fun getNewerCount(newerId: Long): Flow<Int> = flow {
+    override fun getNewerCount(newerId: Long): Flow<Long> = flow {
         while (true) {
             delay(10_000L)
-            val response = apiService.getNewer(newerId)
+            val response = apiService.getNewerCount(newerId)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            body.map { it.savedOnTheServer = 1 }
-            dao.insert(body.toEntity(false))
-            emit(dao.countHidden())
+            emit(body.count)
         }
     }
         .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
+
+//    override fun getNewer(newerId: Long): Flow<Int> = flow {
+//        while (true) {
+//            delay(10_000L)
+//            val response = apiService.getNewer(newerId)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            body.map { it.savedOnTheServer = 1 }
+//            dao.insert(body.toEntity(false))
+//            emit(dao.countHidden())
+//        }
+//    }
+//        .catch { e -> throw AppError.from(e) }
+//        .flowOn(Dispatchers.Default)
 
     override suspend fun getHidden() {
         try {

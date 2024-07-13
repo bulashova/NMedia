@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.Count
@@ -30,14 +30,14 @@ interface OnInteractionListener {
 class PostAdapter(
     private val onInteractionListener: OnInteractionListener
 ) :
-    ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
+    PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PostViewHolder(view, onInteractionListener)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
+        val post = getItem(position) ?: return
         holder.bind(post)
     }
 }
@@ -98,8 +98,8 @@ class PostViewHolder(
             view.text = post.views?.let { Count.formatCount(it) }
 
             like.setOnClickListener {
-                    onInteractionListener.onLike(post)
-                    like.isChecked = post.likedByMe
+                onInteractionListener.onLike(post)
+                like.isChecked = post.likedByMe
             }
 
             share.setOnClickListener {

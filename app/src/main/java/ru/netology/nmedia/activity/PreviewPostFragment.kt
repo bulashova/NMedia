@@ -42,7 +42,7 @@ class PreviewPostFragment : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().navigate(R.id.action_previewPostFragment_to_feedFragment)
+                findNavController().navigateUp()
             }
         })
 
@@ -64,9 +64,7 @@ class PreviewPostFragment : Fragment() {
             }
         }
 
-        val id = requireArguments().longArg
-        val post = viewModel.data.value?.posts?.find { it.id == id }
-
+        viewModel.postById.observe(viewLifecycleOwner) { post ->
         if (post == null) {
             findNavController().navigateUp()
         } else {
@@ -76,95 +74,96 @@ class PreviewPostFragment : Fragment() {
                 content.text = post.content
                 avatar.loadCircleCrop("${BASE_URL}avatars/${post.authorAvatar}")
 
-                if (!post.videoURL.isNullOrBlank()) {
-                    group.visibility = View.VISIBLE
-                    video.setImageResource(R.drawable.ic_youtube)
-                    videoTitle.text = post.videoTitle
-                    play.setOnClickListener {
-                        onPlayVideo(post)
-                    }
-                    video.setOnClickListener {
-                        onPlayVideo(post)
-                    }
-                    videoTitle.setOnClickListener {
-                        onPlayVideo(post)
-                    }
-                } else group.visibility = View.GONE
-
-                if (post.attachment != null) {
-                    attachment.visibility = View.VISIBLE
-                    attachment.load("${BASE_URL}media/${post.attachment.url}")
-                    attachment.setOnClickListener {
-                        findNavController().navigate(
-                            R.id.action_previewPostFragment_to_previewAttachmentFragment,
-                            Bundle().apply {
-                                textArg = requireNotNull(post.attachment).url
-                            })
-                    }
-                } else attachment.visibility = View.GONE
-
-                like.isChecked = post.likedByMe
-                like.text = Count.formatCount(post.likes)
-                share.text = post.shares?.let { Count.formatCount(it) }
-                view.text = post.views?.let { Count.formatCount(it) }
-
-                like.setOnClickListener {
-                    viewModel.likeById(post.id)
-                    findNavController().navigateUp()
-                }
-
-                share.setOnClickListener {
-                    val intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, post.content)
-                        type = "text/plain"
-                    }
-                    val chooser =
-                        Intent.createChooser(intent, getString(R.string.sharing_title))
-
-                    if (packageManager?.let {
-                            chooser.resolveActivity(
-                                it
-                            )
-                        } != null) {
-                        startActivity(chooser)
-                    } else {
-                        Snackbar.make(
-                            binding.root, R.string.no_apps,
-                            BaseTransientBottomBar.LENGTH_INDEFINITE
-                        )
-                            .setAction(R.string.ok) {
-                                findNavController().navigateUp()
-                            }.show()
-                    }
-                }
-
-                menu.setOnClickListener {
-                    PopupMenu(it.context, it).apply {
-                        inflate(R.menu.options_post)
-                        setOnMenuItemClickListener { menuItem ->
-                            when (menuItem.itemId) {
-                                R.id.edit -> {
-                                    findNavController().navigate(
-                                        R.id.action_previewPostFragment_to_newAndEditPostFragment,
-                                        Bundle().apply {
-                                            textArg = post.content
-                                            longArg = post.id
-                                        })
-                                    viewModel.edit(post)
-                                    true
-                                }
-
-                                R.id.remove -> {
-                                    viewModel.removeById(post.id)
-                                    findNavController().navigateUp()
-                                    true
-                                }
-
-                                else -> false
-                            }
+                    if (!post.videoURL.isNullOrBlank()) {
+                        group.visibility = View.VISIBLE
+                        video.setImageResource(R.drawable.ic_youtube)
+                        videoTitle.text = post.videoTitle
+                        play.setOnClickListener {
+                            onPlayVideo(post)
                         }
-                    }.show()
+                        video.setOnClickListener {
+                            onPlayVideo(post)
+                        }
+                        videoTitle.setOnClickListener {
+                            onPlayVideo(post)
+                        }
+                    } else group.visibility = View.GONE
+
+                    if (post.attachment != null) {
+                        attachment.visibility = View.VISIBLE
+                        attachment.load("${BASE_URL}media/${post.attachment.url}")
+                        attachment.setOnClickListener {
+                            findNavController().navigate(
+                                R.id.action_previewPostFragment_to_previewAttachmentFragment,
+                                Bundle().apply {
+                                    textArg = requireNotNull(post.attachment).url
+                                })
+                        }
+                    } else attachment.visibility = View.GONE
+
+                    like.isChecked = post.likedByMe
+                    like.text = Count.formatCount(post.likes)
+                    share.text = post.shares?.let { Count.formatCount(it) }
+                    view.text = post.views?.let { Count.formatCount(it) }
+
+                    like.setOnClickListener {
+                        viewModel.likeById(post)
+                        findNavController().navigateUp()
+                    }
+
+                    share.setOnClickListener {
+                        val intent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, post.content)
+                            type = "text/plain"
+                        }
+                        val chooser =
+                            Intent.createChooser(intent, getString(R.string.sharing_title))
+
+                        if (packageManager?.let {
+                                chooser.resolveActivity(
+                                    it
+                                )
+                            } != null) {
+                            startActivity(chooser)
+                        } else {
+                            Snackbar.make(
+                                binding.root, R.string.no_apps,
+                                BaseTransientBottomBar.LENGTH_INDEFINITE
+                            )
+                                .setAction(R.string.ok) {
+                                    findNavController().navigateUp()
+                                }.show()
+                        }
+                    }
+
+                    menu.setOnClickListener {
+                        PopupMenu(it.context, it).apply {
+                            inflate(R.menu.options_post)
+                            setOnMenuItemClickListener { menuItem ->
+                                when (menuItem.itemId) {
+                                    R.id.edit -> {
+                                        findNavController().navigate(
+                                            R.id.action_previewPostFragment_to_newAndEditPostFragment,
+                                            Bundle().apply {
+                                                textArg = post.content
+                                                longArg = post.id
+                                            })
+                                        viewModel.edit(post)
+                                        true
+                                    }
+
+                                    R.id.remove -> {
+                                        viewModel.removeById(post.id)
+                                        findNavController().navigateUp()
+                                        true
+                                    }
+
+                                    else -> false
+                                }
+                            }
+                        }.show()
+                    }
                 }
             }
         }

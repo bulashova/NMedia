@@ -73,6 +73,8 @@ dependencies {
     def coroutines_version = "1.8.0"
     def coordinatorlayout_version = "1.2.0"
     def imagepicker_version = "2.1"
+    def paging_version = "3.3.0"
+
 
     implementation "androidx.core:core-ktx:$core_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
@@ -108,4 +110,6 @@ dependencies {
 
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    implementation "androidx.room:room-paging:$room_version"
 }
