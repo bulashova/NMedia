@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dao
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
@@ -32,7 +33,7 @@ interface PostDao {
     suspend fun showAll()
 
     @Query("SELECT * FROM PostEntity WHERE id = :id")
-    fun getById(id: Long): PostEntity
+    fun getById(id: Long): LiveData<PostEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)

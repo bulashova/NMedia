@@ -1,5 +1,7 @@
 package ru.netology.nmedia.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.map
@@ -81,8 +83,8 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getById(id: Long): Post {
-        return dao.getById(id).toDto()
+    override suspend fun getById(id: Long): LiveData<Post> {
+        return requireNotNull(dao.getById(id)).map { it.toDto() }
 //        try {
 //            val response = apiService.getById(id)
 //            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
@@ -170,21 +172,35 @@ class PostRepositoryImpl @Inject constructor(
 //        }
     }
 
-    override fun getNewerCount(newerId: Long): Flow<Int> = flow {
+    override fun getNewerCount(newerId: Long): Flow<Long> = flow {
         while (true) {
             delay(10_000L)
-            val response = apiService.getNewer(newerId)
+            val response = apiService.getNewerCount(newerId)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
             val body = response.body() ?: throw ApiError(response.code(), response.message())
-            body.map { it.savedOnTheServer = 1 }
-            dao.insert(body.toEntity(false))
-            emit(dao.countHidden())
+            emit(body.count)
         }
     }
         .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
+
+//    override fun getNewer(newerId: Long): Flow<Int> = flow {
+//        while (true) {
+//            delay(10_000L)
+//            val response = apiService.getNewer(newerId)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            body.map { it.savedOnTheServer = 1 }
+//            dao.insert(body.toEntity(false))
+//            emit(dao.countHidden())
+//        }
+//    }
+//        .catch { e -> throw AppError.from(e) }
+//        .flowOn(Dispatchers.Default)
 
     override suspend fun getHidden() {
         try {

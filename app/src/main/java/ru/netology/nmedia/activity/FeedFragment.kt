@@ -3,6 +3,7 @@ package ru.netology.nmedia.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -117,11 +118,13 @@ class FeedFragment : Fragment() {
             }
 
             override fun onPreview(post: Post) {
+                viewModel.getById(post.id)
                 findNavController().navigate(
                     R.id.action_feedFragment_to_previewPostFragment,
-                    Bundle().apply {
-                        longArg = post.id
-                    })
+//                    Bundle().apply {
+//                        longArg = post.id
+//                    }
+                )
             }
 
             override fun onRetrySave(post: Post) {
@@ -181,16 +184,16 @@ class FeedFragment : Fragment() {
             viewModel.loadPosts()
         }
 
-//        viewModel.newerCount.observe(viewLifecycleOwner) {
-//            Log.d("FeedFragment", "Newer count: $it")
-//            if (it > 0) {
-//                binding.recentEntries.visibility = View.VISIBLE
-//                binding.recentEntries.setOnClickListener {
-//                    viewModel.loadHiddenPosts()
-//                    binding.recentEntries.visibility = View.GONE
-//                }
-//            }
-//        }
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            Log.d("FeedFragment", "Newer count: $it")
+            if (it > 0) {
+                binding.recentEntries.visibility = View.VISIBLE
+                binding.recentEntries.setOnClickListener {
+                    //viewModel.loadHiddenPosts()
+                    binding.recentEntries.visibility = View.GONE
+                }
+            }
+        }
 
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -210,9 +213,8 @@ class FeedFragment : Fragment() {
             } else
                 findNavController().navigate(R.id.action_feedFragment_to_authDialogFragment)
         }
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.refreshPosts()
-        }
+
+        binding.swipeRefresh.setOnRefreshListener(adapter::refresh)
         return binding.root
     }
 }

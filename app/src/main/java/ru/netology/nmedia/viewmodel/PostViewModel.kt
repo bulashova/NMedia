@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepository
@@ -58,9 +60,9 @@ class PostViewModel @Inject constructor(
                 }
         }.flowOn(Dispatchers.Default)
 
-//    val dataWithHidden = repository.dataWithHidden
-//        .map(::FeedModel)
-//        .asLiveData(Dispatchers.Default)
+    val dataWithHidden = repository.dataWithHidden
+        .map(::FeedModel)
+        .asLiveData(Dispatchers.Default)
 
     private val _dataState = MutableLiveData(FeedModelState())
     val dataState: LiveData<FeedModelState>
@@ -76,11 +78,17 @@ class PostViewModel @Inject constructor(
 
     val edited = MutableLiveData(empty)
 
-//    val newerCount: LiveData<Int> = dataWithHidden.switchMap {
-//        val newerId = it.posts.firstOrNull()?.id ?: 0L
-//        repository.getNewerCount(newerId)
-//            .asLiveData(Dispatchers.Default)
-//    }
+    lateinit var postById: LiveData<Post>
+
+    val newerCount: LiveData<Long> = dataWithHidden.switchMap {
+        val newerId = it.posts.firstOrNull()?.id ?: 0L
+        repository.getNewerCount(newerId)
+            .asLiveData(Dispatchers.Default)
+    }
+
+    init {
+        loadPosts()
+    }
 
     fun loadPosts() = viewModelScope.launch {
         try {
@@ -92,8 +100,9 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun getById(id: Long) =
-        repository.getById(id)
+    fun getById(id: Long) = viewModelScope.launch {
+        postById = repository.getById(id)
+    }
 
     fun loadHiddenPosts() = viewModelScope.launch {
         try {
@@ -108,7 +117,7 @@ class PostViewModel @Inject constructor(
     fun refreshPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(refreshing = true)
-            repository.getAll()
+            //repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
