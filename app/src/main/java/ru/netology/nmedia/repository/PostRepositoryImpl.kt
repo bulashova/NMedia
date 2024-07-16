@@ -2,6 +2,7 @@ package ru.netology.nmedia.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.map
@@ -18,6 +19,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
@@ -37,30 +40,28 @@ import javax.inject.Singleton
 @Singleton
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    postRemoteKeyDao: PostRemoteKeyDao,
+    appDb: AppDb
 ) :
     PostRepository {
 
     @Inject
     lateinit var appAuth: AppAuth
 
+    @OptIn(ExperimentalPagingApi::class)
     override val data = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false),)
-//        pagingSourceFactory = {
-//            PostPagingSource(
-//               apiService
-//            )
-//        }
-//    )
-//        .flow
-    {
-        dao.getPagingSource()
+        config = PagingConfig(pageSize = 10),
+        pagingSourceFactory = { dao.getPagingSource() },
+        remoteMediator = PostRemoteMediator(
+            apiService = apiService,
+            postDao = dao,
+            postRemoteKeyDao = postRemoteKeyDao,
+            appDb = appDb,
+        )
 
-    }.flow
-        .map { pagingData ->
-            pagingData
-                .map { it.toDto() }
-        }
+    ).flow
+        .map { it.map(PostEntity::toDto) }
 
     override val dataWithHidden: Flow<List<Post>> = dao.getAll()
         .map(List<PostEntity>::toDto)
