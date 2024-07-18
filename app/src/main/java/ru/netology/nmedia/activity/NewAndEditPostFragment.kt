@@ -114,7 +114,6 @@ class NewAndEditPostFragment : Fragment() {
                             val text = binding.edit.text?.toString()
                             if (!text.isNullOrBlank()) {
                                 viewModel.changeContentAndSave(text)
-                                viewModel.loadPosts()
                                 AndroidUtils.hideKeyboard(requireView())
                                 findNavController().navigateUp()
                             } else {
@@ -155,7 +154,6 @@ class NewAndEditPostFragment : Fragment() {
         }
 
         viewModel.postCreated.observe(viewLifecycleOwner) {
-            viewModel.loadPosts()
             findNavController().navigateUp()
         }
 

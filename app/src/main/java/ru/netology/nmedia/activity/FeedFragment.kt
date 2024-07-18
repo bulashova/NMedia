@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -45,8 +44,6 @@ class FeedFragment : Fragment() {
     ): View? {
         val binding = FragmentFeedBinding.inflate(layoutInflater, container, false)
         val viewModel: PostViewModel by activityViewModels<PostViewModel>()
-
-        viewModel.loadPosts()
 
         val adapter = PostAdapter(object : OnInteractionListener {
             override fun onLike(post: Post) {
@@ -119,12 +116,7 @@ class FeedFragment : Fragment() {
 
             override fun onPreview(post: Post) {
                 viewModel.getById(post.id)
-                findNavController().navigate(
-                    R.id.action_feedFragment_to_previewPostFragment,
-//                    Bundle().apply {
-//                        longArg = post.id
-//                    }
-                )
+                findNavController().navigate(R.id.action_feedFragment_to_previewPostFragment)
             }
 
             override fun onRetrySave(post: Post) {
@@ -168,21 +160,21 @@ class FeedFragment : Fragment() {
             }
         }
 
-        viewModel.dataState.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            binding.swipeRefresh.isRefreshing = state.refreshing
-            if (state.error) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(R.string.retry) {
-                        viewModel.refreshPosts()
-                    }
-                    .show()
-            }
-        }
+//        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+//            binding.progress.isVisible = state.loading
+//            binding.swipeRefresh.isRefreshing = state.refreshing
+//            if (state.error) {
+//                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
+//                    .setAction(R.string.retry) {
+//                        viewModel.refreshPosts()
+//                    }
+//                    .show()
+//            }
+//        }
 
-        binding.retry.setOnClickListener {
-            viewModel.loadPosts()
-        }
+//        binding.retry.setOnClickListener {
+//            viewModel.loadPosts()
+//        }
 
         viewModel.newerCount.observe(viewLifecycleOwner) {
             Log.d("FeedFragment", "Newer count: $it")
