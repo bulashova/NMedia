@@ -1,10 +1,14 @@
 package ru.netology.nmedia.repository
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.TerminalSeparatorType
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -21,10 +25,12 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.SeparatorItem
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
@@ -34,8 +40,11 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.IOException
+import java.time.Duration
+import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.random.Random
 
 @Singleton
 class PostRepositoryImpl @Inject constructor(
@@ -49,6 +58,19 @@ class PostRepositoryImpl @Inject constructor(
     @Inject
     lateinit var appAuth: AppAuth
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    val currentTime = OffsetDateTime.now()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    val yesterday = currentTime.minus(Duration.ofDays(1)).toEpochSecond()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    val weekAgo = currentTime.minus(Duration.ofDays(7)).toEpochSecond()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    val twoWeeksAgo = currentTime.minus(Duration.ofDays(14)).toEpochSecond()
+
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalPagingApi::class)
     override val data = Pager(
         config = PagingConfig(pageSize = 10),
@@ -61,7 +83,61 @@ class PostRepositoryImpl @Inject constructor(
         )
 
     ).flow
-        .map { it.map(PostEntity::toDto) }
+        .map {
+            it.map(PostEntity::toDto)
+                .insertSeparators { previos, _ ->
+                    if (previos?.id?.rem(5) == 0L) {
+                        Ad(Random.nextLong(), previos.published, "figma.jpg")
+                    } else {
+                        null
+                    }
+                }
+                .insertSeparators(terminalSeparatorType = TerminalSeparatorType.SOURCE_COMPLETE)
+                { before, _ ->
+                    if (before == null) {
+                        SeparatorItem(
+                            Random.nextLong(),
+                            0,
+                            "Today",
+                        )
+                    } else null
+                }
+                .insertSeparators { before, after ->
+                    when {
+                        after == null -> null
+
+                        before == null -> null
+
+                        before.published > yesterday &&
+                                after.published <= yesterday ->
+                            SeparatorItem(
+                                Random.nextLong(),
+                                0,
+                                "Yesterday"
+                            )
+
+
+                        before.published > weekAgo &&
+                                after.published <= weekAgo ->
+                            SeparatorItem(
+                                Random.nextLong(),
+                                0,
+                                "Week ago"
+                            )
+
+
+                        before.published > twoWeeksAgo &&
+                                after.published <= twoWeeksAgo ->
+                            SeparatorItem(
+                                Random.nextLong(),
+                                0,
+                                "Two week ago"
+                            )
+
+                        else -> null
+                    }
+                }
+        }
 
     override val dataWithHidden: Flow<List<Post>> = dao.getAll()
         .map(List<PostEntity>::toDto)
@@ -71,8 +147,12 @@ class PostRepositoryImpl @Inject constructor(
         if (dao.isEmpty()) {
             try {
                 val response = apiService.getAll()
-                if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-                val posts = response.body() ?: throw ApiError(response.code(), response.message())
+                if (!response.isSuccessful) throw ApiError(
+                    response.code(),
+                    response.message()
+                )
+                val posts =
+                    response.body() ?: throw ApiError(response.code(), response.message())
                 posts.map { it.savedOnTheServer = 1 }
                 dao.insert(posts.toEntity())
                 dao.showAll()
@@ -148,7 +228,8 @@ class PostRepositoryImpl @Inject constructor(
                 post.savedOnTheServer = 0
                 throw ApiError(response.code(), response.message())
             }
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            val body =
+                response.body() ?: throw ApiError(response.code(), response.message())
             dao.removeById(post.id)
             body.savedOnTheServer = 1
             dao.insert(PostEntity.fromDto(body))
@@ -180,7 +261,8 @@ class PostRepositoryImpl @Inject constructor(
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            val body =
+                response.body() ?: throw ApiError(response.code(), response.message())
             emit(body.count)
         }
     }

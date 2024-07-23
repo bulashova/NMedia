@@ -4,14 +4,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.Count
+import ru.netology.nmedia.databinding.CardAdBinding
 import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.dto.Ad
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.SeparatorItem
 import ru.netology.nmedia.glide.load
 import ru.netology.nmedia.glide.loadCircleCrop
 
@@ -30,15 +36,68 @@ interface OnInteractionListener {
 class PostAdapter(
     private val onInteractionListener: OnInteractionListener
 ) :
-    PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(view, onInteractionListener)
+    PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostDiffCallback) {
+
+    override fun getItemViewType(position: Int): Int =
+        when (getItem(position)) {
+            is Ad -> R.layout.card_ad
+            is Post, null -> R.layout.card_post
+            is SeparatorItem -> R.layout.item_separator
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        when (viewType) {
+            R.layout.card_post -> {
+                val view =
+                    CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                PostViewHolder(view, onInteractionListener)
+            }
+
+            R.layout.card_ad -> {
+                val view = CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                AdViewHolder(view)
+            }
+
+            R.layout.item_separator -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_separator, parent, false)
+                SeparatorViewHolder(view)
+            }
+
+            else -> error("unknown view type: $viewType")
+        }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is Ad -> (holder as? AdViewHolder)?.bind(item)
+            is Post -> (holder as? PostViewHolder)?.bind(item)
+            is SeparatorItem -> (holder as? SeparatorViewHolder)?.bind(item.text)
+            null -> Unit
+        }
+    }
+}
+
+class SeparatorViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private val description: TextView = view.findViewById(R.id.separator_description)
+    fun bind(separatorText: String) {
+        description.text = separatorText
     }
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position) ?: return
-        holder.bind(post)
+    companion object {
+        fun create(parent: ViewGroup): SeparatorViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_separator, parent, false)
+            return SeparatorViewHolder(view)
+        }
+    }
+}
+
+class AdViewHolder(
+    private val binding: CardAdBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind(ad: Ad) {
+        binding.image.load("${BuildConfig.BASE_URL}media/${ad.image}")
     }
 }
 
@@ -55,7 +114,7 @@ class PostViewHolder(
         with(binding) {
             avatar.loadCircleCrop("${BASE_URL}avatars/${post.authorAvatar}")
             author.text = post.author
-            published.text = post.published
+            published.text = post.published.toString()
             content.text = post.content
 
             if (post.savedOnTheServer == 1) {
@@ -138,10 +197,16 @@ class PostViewHolder(
     }
 }
 
-object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
+object PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
 
-    override fun areItemsTheSame(oldItem: Post, newItem: Post) = oldItem.id == newItem.id
+    override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
+        if (oldItem::class != newItem::class) {
+            return false
+        }
+        return oldItem.id == newItem.id
+    }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post) = oldItem == newItem
-
+    override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
+        return oldItem == newItem
+    }
 }

@@ -58,6 +58,10 @@
     <string name="register">Register</string>
     <string name="description_avatar">Avatar</string>
     <string name="change_photo">Change avatar</string>
-
     <string name="notification_from_the_server">Notification from the server</string>
+
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="week_ago">Week ago</string>
+    <string name="two_weeks_ago">Two week ago</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,10 +16,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
@@ -34,7 +35,7 @@ private val empty = Post(
     content = "",
     author = "",
     likedByMe = false,
-    published = "",
+    published = 0,
     authorAvatar = "",
     authorId = 0
 )
@@ -47,18 +48,25 @@ class PostViewModel @Inject constructor(
     private val repository: PostRepository,
     appAuth: AppAuth
 ) : ViewModel() {
-    val data: Flow<PagingData<Post>> = appAuth.authStateFlow
+    private val cached = repository
+        .data
+        .cachedIn(viewModelScope)
+
+    val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow
         .flatMapLatest { (myId, _) ->
-            repository.data
-                .map { posts ->
-                    posts.map {
-                        it.copy(
-                            ownedByMe = it.authorId == myId,
-                            likedByMe = it.likedByMe && myId != 0L,
+            cached.map { pagingData ->
+                pagingData.map { post ->
+                    if (post is Post) {
+                        post.copy(
+                            ownedByMe = post.authorId == myId,
+                            likedByMe = post.likedByMe && myId != 0L
                         )
+                    } else {
+                        post
                     }
                 }
-        }.flowOn(Dispatchers.Default)
+            }
+        }
 
     val dataWithHidden = repository.dataWithHidden
         .map(::FeedModel)
