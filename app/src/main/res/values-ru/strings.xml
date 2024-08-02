@@ -59,6 +59,10 @@
     <string name="register">Зарегистрироваться</string>
     <string name="description_avatar">Аватар</string>
     <string name="change_photo">Изменить аватар</string>
-
     <string name="notification_from_the_server">Уведомление от сервера</string>
+
+    <string name="today">Сегодня</string>
+    <string name="yesterday">Вчера</string>
+    <string name="week_ago">На прошлой неделе</string>
+    <string name="two_weeks_ago">Две недели назад</string>
 </resources>
