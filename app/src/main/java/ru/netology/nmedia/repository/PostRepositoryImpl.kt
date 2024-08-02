@@ -7,7 +7,6 @@ import androidx.lifecycle.map
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.TerminalSeparatorType
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
@@ -40,8 +39,9 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.IOException
-import java.time.Duration
-import java.time.OffsetDateTime
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -59,19 +59,25 @@ class PostRepositoryImpl @Inject constructor(
     lateinit var appAuth: AppAuth
 
     @RequiresApi(Build.VERSION_CODES.O)
-    val currentTime = OffsetDateTime.now()
+    private val currentDate = LocalDate.now()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    val yesterday = currentTime.minus(Duration.ofDays(1)).toEpochSecond()
+    private val yesterday = currentDate.minusDays(1)
 
     @RequiresApi(Build.VERSION_CODES.O)
-    val weekAgo = currentTime.minus(Duration.ofDays(7)).toEpochSecond()
+    private val weekAgo = currentDate.minusDays(7)
 
     @RequiresApi(Build.VERSION_CODES.O)
-    val twoWeeksAgo = currentTime.minus(Duration.ofDays(14)).toEpochSecond()
+    private val twoWeekAgo = currentDate.minusDays(14)
 
     @RequiresApi(Build.VERSION_CODES.O)
+    private fun dateOfPublication(published: Long) =
+        Instant.ofEpochSecond(published)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
     @OptIn(ExperimentalPagingApi::class)
+    @RequiresApi(Build.VERSION_CODES.O)
     override val data = Pager(
         config = PagingConfig(pageSize = 10),
         pagingSourceFactory = { dao.getPagingSource() },
@@ -92,42 +98,36 @@ class PostRepositoryImpl @Inject constructor(
                         null
                     }
                 }
-                .insertSeparators(terminalSeparatorType = TerminalSeparatorType.SOURCE_COMPLETE)
-                { before, _ ->
-                    if (before == null) {
-                        SeparatorItem(
-                            Random.nextLong(),
-                            0,
-                            "Today",
-                        )
-                    } else null
-                }
                 .insertSeparators { before, after ->
                     when {
-                        after == null -> null
-
                         before == null -> null
+                        after == null -> null
+                        (dateOfPublication(before.published) != currentDate &&
+                                dateOfPublication(after.published) == currentDate) ->
+                            SeparatorItem(
+                                Random.nextLong(),
+                                0,
+                                "Today",
+                            )
 
-                        before.published > yesterday &&
-                                after.published <= yesterday ->
+                        (dateOfPublication(before.published) != yesterday &&
+                                dateOfPublication(after.published) == yesterday) ->
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
                                 "Yesterday"
                             )
 
-
-                        before.published > weekAgo &&
-                                after.published <= weekAgo ->
+                        (dateOfPublication(before.published) != weekAgo &&
+                                dateOfPublication(after.published) == weekAgo) ->
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
                                 "Week ago"
                             )
 
-
-                        before.published > twoWeeksAgo &&
-                                after.published <= twoWeeksAgo ->
+                        (dateOfPublication(before.published) != twoWeekAgo &&
+                                dateOfPublication(after.published) == twoWeekAgo) ->
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
