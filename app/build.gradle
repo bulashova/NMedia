@@ -16,8 +16,8 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
 
     buildFeatures {
@@ -40,6 +40,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
         jvmTarget = '17'
@@ -74,6 +75,7 @@ dependencies {
     def coordinatorlayout_version = "1.2.0"
     def imagepicker_version = "2.1"
     def paging_version = "3.3.0"
+    def desugar_jdk_libs_version = "2.0.3"
 
 
     implementation "androidx.core:core-ktx:$core_version"
@@ -112,4 +114,5 @@ dependencies {
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     implementation "androidx.room:room-paging:$room_version"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$desugar_jdk_libs_version"
 }
