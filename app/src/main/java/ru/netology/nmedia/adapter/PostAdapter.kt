@@ -20,6 +20,9 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.SeparatorItem
 import ru.netology.nmedia.glide.load
 import ru.netology.nmedia.glide.loadCircleCrop
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -110,11 +113,20 @@ class PostViewHolder(
         const val BASE_URL = "http://10.0.2.2:9999/"
     }
 
+    private fun dateOfPublication(published: Long) =
+        Instant.ofEpochSecond(published)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
+
     fun bind(post: Post) {
         with(binding) {
             avatar.loadCircleCrop("${BASE_URL}avatars/${post.authorAvatar}")
             author.text = post.author
-            published.text = post.published.toString()
+
+            val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy  HH:mm")
+            val date = dateOfPublication(post.published)
+            published.text = date.format(formatter)
+
             content.text = post.content
 
             if (post.savedOnTheServer == 1) {

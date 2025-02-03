@@ -107,7 +107,7 @@ class PostRepositoryImpl @Inject constructor(
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
-                                "Today",
+                                "Сегодня",
                             )
 
                         (dateOfPublication(before.published) != yesterday &&
@@ -115,7 +115,7 @@ class PostRepositoryImpl @Inject constructor(
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
-                                "Yesterday"
+                                "Вчера"
                             )
 
                         (dateOfPublication(before.published) != weekAgo &&
@@ -123,7 +123,7 @@ class PostRepositoryImpl @Inject constructor(
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
-                                "Week ago"
+                                "На прошлой неделе"
                             )
 
                         (dateOfPublication(before.published) != twoWeekAgo &&
@@ -131,7 +131,7 @@ class PostRepositoryImpl @Inject constructor(
                             SeparatorItem(
                                 Random.nextLong(),
                                 0,
-                                "Two week ago"
+                                "Две недели назад"
                             )
 
                         else -> null

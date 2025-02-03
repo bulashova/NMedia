@@ -22,6 +22,9 @@ import ru.netology.nmedia.glide.loadCircleCrop
 import ru.netology.nmedia.util.LongArg
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @AndroidEntryPoint
 class PreviewPostFragment : Fragment() {
@@ -33,6 +36,11 @@ class PreviewPostFragment : Fragment() {
     }
 
     private val Fragment.packageManager get() = activity?.packageManager
+
+    private fun dateOfPublication(published: Long) =
+        Instant.ofEpochSecond(published)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,7 +78,11 @@ class PreviewPostFragment : Fragment() {
         } else {
             with(binding) {
                 author.text = post.author
-                published.text = post.published.toString()
+
+                val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy  HH:mm")
+                val date = dateOfPublication(post.published)
+                published.text = date.format(formatter)
+
                 content.text = post.content
                 avatar.loadCircleCrop("${BASE_URL}avatars/${post.authorAvatar}")
 
